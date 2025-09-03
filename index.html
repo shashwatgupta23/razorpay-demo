@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee Shop - Razorpay Demo</title>
+    <title>Coffee</title>
     <style>
         * {
             margin: 0;
@@ -12,147 +12,210 @@
         }
         
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #6B4423 0%, #8B4513 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #000000;
+            color: #ffffff;
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
         }
         
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
             text-align: center;
+            padding: 40px 20px;
         }
         
-        .coffee-emoji {
-            font-size: 80px;
-            margin-bottom: 20px;
+        .hero-text {
+            font-size: clamp(4rem, 12vw, 8rem);
+            font-weight: 900;
+            line-height: 0.85;
+            letter-spacing: -0.05em;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        h1 {
-            color: #6B4423;
-            margin-bottom: 30px;
-            font-size: 2.5em;
+        .subtitle {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-weight: 300;
+            color: #999999;
+            margin-bottom: 4rem;
+            letter-spacing: 0.02em;
         }
         
-        .product-card {
-            background: #f8f8f8;
-            border-radius: 15px;
-            padding: 30px;
-            margin: 20px 0;
-        }
-        
-        .product-name {
-            font-size: 1.8em;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .product-description {
-            color: #666;
-            margin-bottom: 20px;
-            line-height: 1.5;
+        .product-section {
+            margin-bottom: 4rem;
         }
         
         .currency-selector {
-            margin: 20px 0;
+            margin: 3rem 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
         }
         
         .currency-selector label {
-            font-weight: bold;
-            margin-right: 10px;
-            color: #6B4423;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #cccccc;
+            letter-spacing: 0.02em;
         }
         
         .currency-selector select {
-            padding: 10px 15px;
-            border: 2px solid #6B4423;
-            border-radius: 8px;
+            padding: 12px 20px;
+            border: 1px solid #333333;
+            border-radius: 12px;
             font-size: 16px;
-            background: white;
+            background: #111111;
+            color: #ffffff;
             cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            min-width: 200px;
+        }
+        
+        .currency-selector select:hover {
+            border-color: #555555;
+            background: #1a1a1a;
+        }
+        
+        .currency-selector select:focus {
+            border-color: #ffffff;
         }
         
         .price {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #6B4423;
-            margin: 20px 0;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 700;
+            margin: 3rem 0;
+            letter-spacing: -0.02em;
         }
         
-        .pay-button {
-            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
-            color: white;
+        .cta-button {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            color: #000000;
             border: none;
-            padding: 18px 40px;
-            font-size: 1.2em;
-            font-weight: bold;
-            border-radius: 12px;
+            padding: 20px 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-top: 20px;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            letter-spacing: 0.02em;
+            min-width: 280px;
+            position: relative;
+            overflow: hidden;
         }
         
-        .pay-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+        .cta-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 255, 255, 0.15);
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
         }
         
-        .pay-button:active {
-            transform: translateY(0);
+        .cta-button:active {
+            transform: translateY(0) scale(1);
         }
         
         .footer {
-            margin-top: 30px;
-            color: #999;
-            font-size: 0.9em;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: #444444;
+            letter-spacing: 0.05em;
+            font-weight: 300;
+        }
+        
+        /* Subtle animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .container > * {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        .hero-text {
+            animation-delay: 0.1s;
+        }
+        
+        .subtitle {
+            animation-delay: 0.2s;
+        }
+        
+        .currency-selector {
+            animation-delay: 0.3s;
+        }
+        
+        .price {
+            animation-delay: 0.4s;
+        }
+        
+        .cta-button {
+            animation-delay: 0.5s;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .currency-selector {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+            
+            .cta-button {
+                min-width: 260px;
+                padding: 18px 40px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="coffee-emoji">☕</div>
-        <h1>Coffee Shop</h1>
+        <h1 class="hero-text">Coffee</h1>
+        <p class="subtitle">Black, just how you like it</p>
         
-        <div class="product-card">
-            <div class="product-name">Premium Arabica Coffee</div>
-            <div class="product-description">
-                Rich, smooth, and perfectly roasted coffee beans from the finest plantations. 
-                A perfect cup to start your day!
-            </div>
-            
+        <div class="product-section">
             <div class="currency-selector">
-                <label for="currency">Currency:</label>
+                <label for="currency">Currency</label>
                 <select id="currency" onchange="updatePrice()">
-                    <option value="SGD">SGD (Singapore Dollar)</option>
-                    <option value="USD">USD (US Dollar)</option>
-                    <option value="EUR">EUR (Euro)</option>
-                    <option value="GBP">GBP (British Pound)</option>
-                    <option value="INR">INR (Indian Rupee)</option>
-                    <option value="JPY">JPY (Japanese Yen)</option>
-                    <option value="AUD">AUD (Australian Dollar)</option>
-                    <option value="CAD">CAD (Canadian Dollar)</option>
-                    <option value="MYR">MYR (Malaysian Ringgit)</option>
+                    <option value="SGD">SGD</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                    <option value="INR">INR</option>
+                    <option value="JPY">JPY</option>
+                    <option value="AUD">AUD</option>
+                    <option value="CAD">CAD</option>
+                    <option value="MYR">MYR</option>
                 </select>
             </div>
             
             <div class="price" id="price">1.00 SGD</div>
             
-            <button class="pay-button" onclick="initiatePayment()">
-                ☕ Buy Now with Razorpay
+            <button class="cta-button" onclick="initiatePayment()">
+                Buy Now
             </button>
         </div>
-        
-        <div class="footer">
-            <p>Powered by Razorpay | Demo Website</p>
-        </div>
+    </div>
+
+    <div class="footer">
+        Razorpay does not endorse this page
     </div>
 
     <!-- IMPORTANT: Razorpay Checkout Script -->
@@ -173,7 +236,7 @@
         };
 
         // Debug: Log when page loads
-        console.log('Coffee Shop page loaded');
+        console.log('Premium page loaded');
         console.log('Available currencies:', Object.keys(exchangeRates));
         
         function updatePrice() {
@@ -224,8 +287,8 @@
                 "key": "rzp_live_sg_mA1ssIHKmWatUP", // Your actual key
                 "amount": amount, // Amount in smallest currency unit
                 "currency": currency,
-                "name": "Coffee Shop",
-                "description": "Premium Arabica Coffee",
+                "name": "Premium",
+                "description": "Premium Product",
                 "handler": function (response) {
                     // This function handles successful payment
                     alert("Payment Successful!\n" + 
@@ -242,10 +305,10 @@
                     "contact": ""
                 },
                 "notes": {
-                    "address": "Coffee Shop - Razorpay Demo"
+                    "address": "Premium Demo"
                 },
                 "theme": {
-                    "color": "#6B4423"
+                    "color": "#000000"
                 },
                 "modal": {
                     "ondismiss": function() {
