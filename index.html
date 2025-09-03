@@ -139,6 +139,7 @@
                     <option value="JPY">JPY (Japanese Yen)</option>
                     <option value="AUD">AUD (Australian Dollar)</option>
                     <option value="CAD">CAD (Canadian Dollar)</option>
+                    <option value="MYR">MYR (Malaysian Ringgit)</option>
                 </select>
             </div>
             
@@ -154,6 +155,9 @@
         </div>
     </div>
 
+    <!-- IMPORTANT: Razorpay Checkout Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
     <script>
         // Exchange rates (approximate - in real app, fetch from API)
         const exchangeRates = {
@@ -164,13 +168,20 @@
             'INR': 62.00,
             'JPY': 110.00,
             'AUD': 1.12,
-            'CAD': 1.01
+            'CAD': 1.01,
+            'MYR': 3.42
         };
 
+        // Debug: Log when page loads
+        console.log('Coffee Shop page loaded');
+        console.log('Available currencies:', Object.keys(exchangeRates));
+        
         function updatePrice() {
+            console.log('updatePrice called'); // Debug log
             const currency = document.getElementById('currency').value;
+            console.log('Selected currency:', currency); // Debug log
             const basePrice = 1.00; // Base price in SGD
-            const convertedPrice = (basePrice * exchangeRates[currency]).toFixed(2);
+            const convertedPrice = (basePrice * exchangeRates[currency]);
             
             // Format for currencies that don't use decimals
             let displayPrice;
@@ -180,10 +191,20 @@
                 displayPrice = parseFloat(convertedPrice).toFixed(2);
             }
             
+            console.log('Display price:', displayPrice, currency); // Debug log
             document.getElementById('price').textContent = `${displayPrice} ${currency}`;
         }
 
         function initiatePayment() {
+            console.log('initiatePayment called'); // Debug log
+            
+            // Check if Razorpay is loaded
+            if (typeof Razorpay === 'undefined') {
+                alert('❌ Razorpay script not loaded. Please check your internet connection and try again.');
+                console.error('Razorpay is not defined');
+                return;
+            }
+
             const currency = document.getElementById('currency').value;
             const basePrice = 1.00; // Base price in SGD
             const convertedPrice = (basePrice * exchangeRates[currency]);
@@ -196,14 +217,15 @@
                 amount = Math.round(convertedPrice * 100); // Convert to smallest unit (cents/paise)
             }
 
+            console.log('Payment details:', {currency, convertedPrice, amount}); // Debug log
+
             // Razorpay Configuration
             const options = {
-                "key": "rzp_live_sg_mA1ssIHKmWatUP", // Replace with your actual key
+                "key": "rzp_live_sg_mA1ssIHKmWatUP", // Your actual key
                 "amount": amount, // Amount in smallest currency unit
                 "currency": currency,
                 "name": "Coffee Shop",
                 "description": "Premium Arabica Coffee",
-                "image": "☕", // You can replace this with your logo URL
                 "handler": function (response) {
                     // This function handles successful payment
                     alert("Payment Successful!\n" + 
@@ -232,16 +254,22 @@
                 }
             };
 
-            // Check if Razorpay key is set
-            if (options.key === "YOUR_RAZORPAY_KEY_ID") {
-                alert("⚠️ Demo Mode\n\nPlease replace 'YOUR_RAZORPAY_KEY_ID' with your actual Razorpay key to enable real payments.\n\nCurrency: " + currency + "\nAmount: " + (amount/100).toFixed(2) + " " + currency);
-                return;
-            }
-
             // Open Razorpay Checkout
-            const rzp = new Razorpay(options);
-            rzp.open();
+            try {
+                console.log('Opening Razorpay checkout...'); // Debug log
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } catch (error) {
+                console.error('Razorpay error:', error);
+                alert('❌ Error initializing payment: ' + error.message);
+            }
         }
+
+        // Initialize price on page load
+        window.onload = function() {
+            console.log('Window loaded, initializing...');
+            updatePrice();
+        };
     </script>
 </body>
 </html>
