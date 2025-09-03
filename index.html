@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Shop - Razorpay Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #6B4423 0%, #8B4513 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .coffee-emoji {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #6B4423;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .product-card {
+            background: #f8f8f8;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        
+        .product-name {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .product-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .currency-selector {
+            margin: 20px 0;
+        }
+        
+        .currency-selector label {
+            font-weight: bold;
+            margin-right: 10px;
+            color: #6B4423;
+        }
+        
+        .currency-selector select {
+            padding: 10px 15px;
+            border: 2px solid #6B4423;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .price {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #6B4423;
+            margin: 20px 0;
+        }
+        
+        .pay-button {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .pay-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+        }
+        
+        .pay-button:active {
+            transform: translateY(0);
+        }
+        
+        .footer {
+            margin-top: 30px;
+            color: #999;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="coffee-emoji">☕</div>
+        <h1>Coffee Shop</h1>
+        
+        <div class="product-card">
+            <div class="product-name">Premium Arabica Coffee</div>
+            <div class="product-description">
+                Rich, smooth, and perfectly roasted coffee beans from the finest plantations. 
+                A perfect cup to start your day!
+            </div>
+            
+            <div class="currency-selector">
+                <label for="currency">Currency:</label>
+                <select id="currency" onchange="updatePrice()">
+                    <option value="SGD">SGD (Singapore Dollar)</option>
+                    <option value="USD">USD (US Dollar)</option>
+                    <option value="EUR">EUR (Euro)</option>
+                    <option value="GBP">GBP (British Pound)</option>
+                    <option value="INR">INR (Indian Rupee)</option>
+                    <option value="JPY">JPY (Japanese Yen)</option>
+                    <option value="AUD">AUD (Australian Dollar)</option>
+                    <option value="CAD">CAD (Canadian Dollar)</option>
+                </select>
+            </div>
+            
+            <div class="price" id="price">1.00 SGD</div>
+            
+            <button class="pay-button" onclick="initiatePayment()">
+                ☕ Buy Now with Razorpay
+            </button>
+        </div>
+        
+        <div class="footer">
+            <p>Powered by Razorpay | Demo Website</p>
+        </div>
+    </div>
+
+    <script>
+        // Exchange rates (approximate - in real app, fetch from API)
+        const exchangeRates = {
+            'SGD': 1.00,
+            'USD': 0.74,
+            'EUR': 0.68,
+            'GBP': 0.58,
+            'INR': 62.00,
+            'JPY': 110.00,
+            'AUD': 1.12,
+            'CAD': 1.01
+        };
+
+        function updatePrice() {
+            const currency = document.getElementById('currency').value;
+            const basePrice = 1.00; // Base price in SGD
+            const convertedPrice = (basePrice * exchangeRates[currency]).toFixed(2);
+            
+            // Format for currencies that don't use decimals
+            let displayPrice;
+            if (currency === 'JPY') {
+                displayPrice = Math.round(convertedPrice);
+            } else {
+                displayPrice = convertedPrice;
+            }
+            
+            document.getElementById('price').textContent = `${displayPrice} ${currency}`;
+        }
+
+        function initiatePayment() {
+            const currency = document.getElementById('currency').value;
+            const price = document.getElementById('price').textContent;
+            
+            // This is where you'll integrate Razorpay
+            alert(`Payment initiated for ${price}\n\nNote: This is a demo. In a real implementation, this would open Razorpay checkout with the selected currency and amount.`);
+            
+            // TODO: Replace with actual Razorpay integration
+            // Example Razorpay code would go here:
+            /*
+            var options = {
+                "key": "YOUR_RAZORPAY_KEY",
+                "amount": amount * 100, // amount in smallest currency unit
+                "currency": currency,
+                "name": "Coffee Shop",
+                "description": "Premium Arabica Coffee",
+                "handler": function (response) {
+                    alert("Payment successful: " + response.razorpay_payment_id);
+                }
+            };
+            var rzp1 = new Razorpay(options);
+            rzp1.open();
+            */
+        }
+    </script>
+</body>
+</html>
