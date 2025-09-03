@@ -198,7 +198,7 @@
 
             // Razorpay Configuration
             const options = {
-                "key": "YOUR_RAZORPAY_KEY_ID", // Replace with your actual key
+                "key": "rzp_live_sg_mA1ssIHKmWatUP", // Replace with your actual key
                 "amount": amount, // Amount in smallest currency unit
                 "currency": currency,
                 "name": "Coffee Shop",
@@ -233,7 +233,7 @@
             };
 
             // Check if Razorpay key is set
-            if (options.key === "rzp_live_sg_mA1ssIHKmWatUP") {
+            if (options.key === "YOUR_RAZORPAY_KEY_ID") {
                 alert("⚠️ Demo Mode\n\nPlease replace 'YOUR_RAZORPAY_KEY_ID' with your actual Razorpay key to enable real payments.\n\nCurrency: " + currency + "\nAmount: " + (amount/100).toFixed(2) + " " + currency);
                 return;
             }
