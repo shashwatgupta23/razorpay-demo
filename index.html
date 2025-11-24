@@ -233,25 +233,22 @@
             
             <div class="price" id="price">1.00 SGD</div>
             
-            <button class="cta-button" onclick="initiatePayment()">
-                Buy Now
-            </button>
-        </div>
-    </div>
-    <div class="payment-buttons">
-        <button class="cta-button" onclick="initiatePayment()">
-            Buy with Razorpay
-        </button>
+            <div class="payment-buttons">
+                <button class="cta-button" onclick="initiatePayment()">
+                    Buy with Razorpay
+                </button>
     
-        <div class="divider">OR</div>
+                <div class="divider">OR</div>
     
-        <apple-pay-button 
-            id="apple-pay-button"
-            buttonstyle="white-outline" 
-            type="buy" 
-            locale="en"
-            onclick="initiateApplePay()">
-        </apple-pay-button>
+                <apple-pay-button 
+                    id="apple-pay-button"
+                    buttonstyle="white-outline" 
+                    type="buy" 
+                    locale="en"
+                    onclick="initiateApplePay()">
+                </apple-pay-button>
+            </div>
+      </div>
     </div>
 
     <div class="footer">
