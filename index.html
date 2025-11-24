@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coffee</title>
@@ -9,6 +10,30 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+        apple-pay-button {
+            --apple-pay-button-width: 280px;
+            --apple-pay-button-height: 50px;
+            --apple-pay-button-border-radius: 50px;
+            --apple-pay-button-padding: 0px 0px;
+            --apple-pay-button-box-sizing: border-box;
+            margin-top: 20px;
+            display: inline-block;
+        }
+
+        .payment-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .divider {
+            color: #666666;
+            font-size: 0.9rem;
+            margin: 10px 0;
+            font-weight: 300;
         }
         
         body {
@@ -213,6 +238,21 @@
             </button>
         </div>
     </div>
+    <div class="payment-buttons">
+        <button class="cta-button" onclick="initiatePayment()">
+            Buy with Razorpay
+        </button>
+    
+        <div class="divider">OR</div>
+    
+        <apple-pay-button 
+            id="apple-pay-button"
+            buttonstyle="white-outline" 
+            type="buy" 
+            locale="en"
+            onclick="initiateApplePay()">
+        </apple-pay-button>
+    </div>
 
     <div class="footer">
         Razorpay does not endorse this page
@@ -334,5 +374,203 @@
             updatePrice();
         };
     </script>
+    <script>
+        // ============================================
+        // APPLE PAY IMPLEMENTATION
+        // ============================================
+        
+        // Configuration - YOU NEED TO UPDATE THESE
+        const FINIX_CONFIG = {
+            merchantIdentity: "IDfCk7y7uDv7tacv8qjqxPFo",
+            domain: "shashwatgupta23.github.io",
+            displayName: "Coffee Shop",
+            // TODO: Get this from Finix
+            // apiKey: "YOUR_FINIX_API_KEY",
+            // apiSecret: "YOUR_FINIX_API_SECRET"
+        };
+        
+        // Check if Apple Pay is available
+        function checkApplePayAvailability() {
+            if (window.ApplePaySession) {
+                if (ApplePaySession.canMakePayments()) {
+                    console.log('✅ Apple Pay is available');
+                    document.getElementById('apple-pay-button').style.display = 'inline-block';
+                    return true;
+                } else {
+                    console.log('⚠️ Apple Pay not set up on this device');
+                    document.getElementById('apple-pay-button').style.display = 'none';
+                    return false;
+                }
+            } else {
+                console.log('❌ Apple Pay not supported on this browser');
+                document.getElementById('apple-pay-button').style.display = 'none';
+                return false;
+            }
+        }
+        
+        // Initialize Apple Pay when button is clicked
+        function initiateApplePay() {
+            console.log('🍎 Apple Pay initiated');
+            
+            if (!checkApplePayAvailability()) {
+                alert('Apple Pay is not available on this device or browser');
+                return;
+            }
+            
+            const currency = document.getElementById('currency').value;
+            const basePrice = 1.00;
+            const convertedPrice = (basePrice * exchangeRates[currency]);
+            
+            // Format amount for Apple Pay
+            let displayAmount;
+            if (currency === 'JPY') {
+                displayAmount = Math.round(convertedPrice).toString();
+            } else {
+                displayAmount = convertedPrice.toFixed(2);
+            }
+            
+            console.log('💰 Payment amount:', displayAmount, currency);
+            
+            // Create Apple Pay payment request
+            const request = {
+                countryCode: 'US',
+                currencyCode: currency,
+                merchantCapabilities: ['supports3DS'],
+                supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
+                total: {
+                    label: FINIX_CONFIG.displayName,
+                    amount: displayAmount,
+                    type: 'final'
+                },
+                requiredBillingContactFields: ['postalAddress', 'name']
+            };
+            
+            console.log('📋 Apple Pay request:', request);
+            
+            // Create Apple Pay session
+            try {
+                const session = new ApplePaySession(6, request);
+                
+                // Handle merchant validation
+                session.onvalidatemerchant = function(event) {
+                    console.log('🔐 Validating merchant...');
+                    validateMerchant(event.validationURL, session);
+                };
+                
+                // Handle payment authorization
+                session.onpaymentauthorized = function(event) {
+                    console.log('✅ Payment authorized');
+                    handlePaymentAuthorization(event.payment, session, currency, displayAmount);
+                };
+                
+                // Handle cancel
+                session.oncancel = function(event) {
+                    console.log('❌ Apple Pay cancelled');
+                };
+                
+                // Begin the session
+                session.begin();
+                console.log('🚀 Apple Pay session started');
+                
+            } catch (error) {
+                console.error('❌ Error starting Apple Pay session:', error);
+                alert('Error starting Apple Pay: ' + error.message);
+            }
+        }
+        
+        // Validate merchant with Apple (calls your backend)
+        async function validateMerchant(validationURL, session) {
+            console.log('📡 Calling backend for merchant validation...');
+            console.log('Validation URL:', validationURL);
+            
+            try {
+                // TODO: Replace with your actual backend endpoint
+                // This endpoint should call Finix's /apple_pay_sessions API
+                const response = await fetch('YOUR_BACKEND_URL/validate-merchant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        validationURL: validationURL,
+                        domain: FINIX_CONFIG.domain,
+                        merchantIdentity: FINIX_CONFIG.merchantIdentity,
+                        displayName: FINIX_CONFIG.displayName
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Merchant validation failed: ' + response.statusText);
+                }
+                
+                const merchantSession = await response.json();
+                console.log('✅ Merchant session received');
+                
+                // Complete merchant validation
+                session.completeMerchantValidation(merchantSession);
+                
+            } catch (error) {
+                console.error('❌ Merchant validation error:', error);
+                session.abort();
+                alert('Merchant validation failed. Please try again.');
+            }
+        }
+        
+        // Handle payment authorization (create payment instrument and charge)
+        async function handlePaymentAuthorization(payment, session, currency, amount) {
+            console.log('💳 Processing payment...');
+            console.log('Payment token:', payment.token);
+            console.log('Billing contact:', payment.billingContact);
+            
+            try {
+                // TODO: Replace with your actual backend endpoint
+                // This endpoint should:
+                // 1. Create Finix buyer identity (if needed)
+                // 2. Create Finix payment instrument with Apple Pay token
+                // 3. Create Finix authorization/transfer
+                
+                const response = await fetch('YOUR_BACKEND_URL/process-apple-pay', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        paymentToken: JSON.stringify(payment.token),
+                        billingContact: payment.billingContact,
+                        currency: currency,
+                        amount: amount,
+                        merchantIdentity: FINIX_CONFIG.merchantIdentity
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Payment processing failed: ' + response.statusText);
+                }
+                
+                const result = await response.json();
+                console.log('✅ Payment processed:', result);
+                
+                // Complete payment successfully
+                session.completePayment(ApplePaySession.STATUS_SUCCESS);
+                
+                // Show success message
+                alert('Payment Successful! ✅\nThank you for your purchase.');
+                
+            } catch (error) {
+                console.error('❌ Payment processing error:', error);
+                
+                // Complete payment with failure
+                session.completePayment(ApplePaySession.STATUS_FAILURE);
+                
+                alert('Payment failed. Please try again.');
+            }
+        }
+        
+        // Check Apple Pay availability on page load
+        window.addEventListener('load', function() {
+            console.log('🔍 Checking Apple Pay availability...');
+            checkApplePayAvailability();
+        });
+</script>
 </body>
 </html>
