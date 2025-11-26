@@ -380,13 +380,36 @@
             displayName: "Coffee Shop"
         };
         
-        // Check if Apple Pay is available
+        // Check if Apple Pay is available with enhanced capabilities check
         function checkApplePayAvailability() {
             if (window.ApplePaySession) {
-                if (ApplePaySession.canMakePayments()) {
-                    console.log('✅ Apple Pay is available');
+                // Check if Apple Pay is supported on this device/browser
+                const applePayCapabilities = ApplePaySession.supportsVersion(6);
+                
+                if (applePayCapabilities && ApplePaySession.canMakePayments()) {
+                    console.log('✅ Apple Pay is available (Version 6 supported)');
+                    console.log('✅ Apple Pay can make payments');
+                    
+                    // Optional: Check if user has cards set up (requires merchant identifier from Apple)
+                    // Note: This requires your actual Apple Merchant ID
+                    // ApplePaySession.canMakePaymentsWithActiveCard('merchant.com.example')
+                    //     .then((canMakePayments) => {
+                    //         if (canMakePayments) {
+                    //             console.log('✅ User has active Apple Pay cards');
+                    //         } else {
+                    //             console.log('⚠️ User needs to add cards to Apple Pay');
+                    //         }
+                    //     })
+                    //     .catch((error) => {
+                    //         console.log('⚠️ Could not check for active cards:', error);
+                    //     });
+                    
                     document.getElementById('apple-pay-button').style.display = 'inline-block';
                     return true;
+                } else if (!applePayCapabilities) {
+                    console.log('❌ Apple Pay Version 6 not supported');
+                    document.getElementById('apple-pay-button').style.display = 'none';
+                    return false;
                 } else {
                     console.log('⚠️ Apple Pay not set up on this device');
                     document.getElementById('apple-pay-button').style.display = 'none';
@@ -574,3 +597,17 @@
     </script>
 </body>
 </html>
+```
+
+## ✅ Key Changes:
+
+1. **`supportsVersion(6)`** - Checks for ApplePaySession v6 support
+2. **Better logging** - Shows exact capabilities
+3. **Optional card check** - Commented out `canMakePaymentsWithActiveCard()` (needs actual Apple Merchant ID)
+
+## 🧪 Test it:
+
+Open in Safari and check console - you should now see:
+```
+✅ Apple Pay is available (Version 6 supported)
+✅ Apple Pay can make payments
