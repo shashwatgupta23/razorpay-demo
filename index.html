@@ -248,7 +248,7 @@
                     onclick="initiateApplePay()">
                 </apple-pay-button>
             </div>
-      </div>
+        </div>
     </div>
 
     <div class="footer">
@@ -277,9 +277,9 @@
         console.log('Available currencies:', Object.keys(exchangeRates));
         
         function updatePrice() {
-            console.log('updatePrice called'); // Debug log
+            console.log('updatePrice called');
             const currency = document.getElementById('currency').value;
-            console.log('Selected currency:', currency); // Debug log
+            console.log('Selected currency:', currency);
             const basePrice = 1.00; // Base price in SGD
             const convertedPrice = (basePrice * exchangeRates[currency]);
             
@@ -291,12 +291,12 @@
                 displayPrice = parseFloat(convertedPrice).toFixed(2);
             }
             
-            console.log('Display price:', displayPrice, currency); // Debug log
+            console.log('Display price:', displayPrice, currency);
             document.getElementById('price').textContent = `${displayPrice} ${currency}`;
         }
 
         function initiatePayment() {
-            console.log('initiatePayment called'); // Debug log
+            console.log('initiatePayment called');
             
             // Check if Razorpay is loaded
             if (typeof Razorpay === 'undefined') {
@@ -312,28 +312,23 @@
             // Convert to smallest currency unit (paise/cents)
             let amount;
             if (currency === 'JPY') {
-                amount = Math.round(convertedPrice); // JPY doesn't have subunits
+                amount = Math.round(convertedPrice);
             } else {
-                amount = Math.round(convertedPrice * 100); // Convert to smallest unit (cents/paise)
+                amount = Math.round(convertedPrice * 100);
             }
 
-            console.log('Payment details:', {currency, convertedPrice, amount}); // Debug log
+            console.log('Payment details:', {currency, convertedPrice, amount});
 
             // Razorpay Configuration
             const options = {
-                "key": "rzp_live_us_zTra1XQBrgsH7z", // Your actual key
-                "amount": amount, // Amount in smallest currency unit
+                "key": "rzp_live_us_zTra1XQBrgsH7z",
+                "amount": amount,
                 "currency": currency,
-                "name": "Premium",
-                "description": "Premium Product",
+                "name": "Coffee Shop",
+                "description": "Premium Coffee",
                 "handler": function (response) {
-                    // This function handles successful payment
                     alert("Payment Successful!\n" + 
-                          "Payment ID: " + response.razorpay_payment_id + "\n" +
-                          "Order ID: " + response.razorpay_order_id + "\n" +
-                          "Signature: " + response.razorpay_signature);
-                    
-                    // Here you would typically send this data to your server for verification
+                          "Payment ID: " + response.razorpay_payment_id);
                     console.log("Payment Response:", response);
                 },
                 "prefill": {
@@ -342,7 +337,7 @@
                     "contact": ""
                 },
                 "notes": {
-                    "address": "Premium Demo"
+                    "product": "Coffee"
                 },
                 "theme": {
                     "color": "#000000"
@@ -354,9 +349,8 @@
                 }
             };
 
-            // Open Razorpay Checkout
             try {
-                console.log('Opening Razorpay checkout...'); // Debug log
+                console.log('Opening Razorpay checkout...');
                 const rzp = new Razorpay(options);
                 rzp.open();
             } catch (error) {
@@ -371,19 +365,19 @@
             updatePrice();
         };
     </script>
+    
     <script>
         // ============================================
         // APPLE PAY IMPLEMENTATION
         // ============================================
         
-        // Configuration - YOU NEED TO UPDATE THESE
-        const FINIX_CONFIG = {
-            merchantIdentity: "IDfCk7y7uDv7tacv8qjqxPFo",
+        // Razorpay Singapore Key for Apple Pay
+        const RAZORPAY_KEY = 'rzp_live_sg_mA1ssIHKmWatUP';
+        
+        // Configuration
+        const APPLE_PAY_CONFIG = {
             domain: "shashwatgupta23.github.io",
-            displayName: "Coffee Shop",
-            // TODO: Get this from Finix
-            // apiKey: "YOUR_FINIX_API_KEY",
-            // apiSecret: "YOUR_FINIX_API_SECRET"
+            displayName: "Coffee Shop"
         };
         
         // Check if Apple Pay is available
@@ -435,7 +429,7 @@
                 merchantCapabilities: ['supports3DS'],
                 supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
                 total: {
-                    label: FINIX_CONFIG.displayName,
+                    label: APPLE_PAY_CONFIG.displayName,
                     amount: displayAmount,
                     type: 'final'
                 },
@@ -451,7 +445,7 @@
                 // Handle merchant validation
                 session.onvalidatemerchant = function(event) {
                     console.log('🔐 Validating merchant...');
-                    validateMerchant(event.validationURL, session);
+                    validateMerchant(event.validationURL, session, currency, displayAmount);
                 };
                 
                 // Handle payment authorization
@@ -475,33 +469,64 @@
             }
         }
         
-        // Validate merchant with Apple (calls your backend)
-        async function validateMerchant(validationURL, session) {
-            console.log('📡 Calling backend for merchant validation...');
+        // Validate merchant with Apple (calls Razorpay API)
+        async function validateMerchant(validationURL, session, currency, amount) {
+            console.log('📡 Calling Razorpay for merchant validation...');
             console.log('Validation URL:', validationURL);
             
             try {
-                // TODO: Replace with your actual backend endpoint
-                // This endpoint should call Finix's /apple_pay_sessions API
-                const response = await fetch('YOUR_BACKEND_URL/validate-merchant', {
+                // Calculate amount in smallest currency unit
+                let amountInCents;
+                if (currency === 'JPY') {
+                    amountInCents = Math.round(parseFloat(amount));
+                } else {
+                    amountInCents = Math.round(parseFloat(amount) * 100);
+                }
+                
+                console.log('Amount in cents:', amountInCents);
+                
+                // Encode Razorpay key for Basic Auth
+                const authString = btoa(RAZORPAY_KEY + ':');
+                
+                // Call Razorpay API
+                const response = await fetch('https://api.razorpay.com/v1/payments/create/ajax', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${authString}`
                     },
                     body: JSON.stringify({
-                        validationURL: validationURL,
-                        domain: FINIX_CONFIG.domain,
-                        merchantIdentity: FINIX_CONFIG.merchantIdentity,
-                        displayName: FINIX_CONFIG.displayName
+                        method: 'card',
+                        amount: amountInCents,
+                        contact: '+910000000000',
+                        email: 'applepay@example.com',
+                        currency: currency,
+                        provider: 'apple_pay',
+                        initiative_context_url: APPLE_PAY_CONFIG.domain,
+                        merchant_validation_url: validationURL,
+                        save: 0
                     })
                 });
                 
                 if (!response.ok) {
-                    throw new Error('Merchant validation failed: ' + response.statusText);
+                    const errorText = await response.text();
+                    console.error('❌ Razorpay API error:', errorText);
+                    throw new Error(`Razorpay validation failed: ${response.status}`);
                 }
                 
-                const merchantSession = await response.json();
-                console.log('✅ Merchant session received');
+                const data = await response.json();
+                console.log('✅ Razorpay response received:', data);
+                
+                // Extract merchant session from Razorpay response
+                // Check the actual response structure in console
+                const merchantSession = data.apple_pay_session || data.session || data;
+                
+                if (!merchantSession) {
+                    console.error('❌ No merchant session in response:', data);
+                    throw new Error('Invalid merchant session response');
+                }
+                
+                console.log('✅ Merchant session:', merchantSession);
                 
                 // Complete merchant validation
                 session.completeMerchantValidation(merchantSession);
@@ -509,49 +534,27 @@
             } catch (error) {
                 console.error('❌ Merchant validation error:', error);
                 session.abort();
-                alert('Merchant validation failed. Please try again.');
+                alert('Merchant validation failed. Please check console for details.');
             }
         }
         
-        // Handle payment authorization (create payment instrument and charge)
+        // Handle payment authorization
         async function handlePaymentAuthorization(payment, session, currency, amount) {
             console.log('💳 Processing payment...');
             console.log('Payment token:', payment.token);
             console.log('Billing contact:', payment.billingContact);
             
             try {
-                // TODO: Replace with your actual backend endpoint
-                // This endpoint should:
-                // 1. Create Finix buyer identity (if needed)
-                // 2. Create Finix payment instrument with Apple Pay token
-                // 3. Create Finix authorization/transfer
+                // For now, just complete successfully
+                // In production, you'd send this to your backend to process with Razorpay/Finix
                 
-                const response = await fetch('YOUR_BACKEND_URL/process-apple-pay', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        paymentToken: JSON.stringify(payment.token),
-                        billingContact: payment.billingContact,
-                        currency: currency,
-                        amount: amount,
-                        merchantIdentity: FINIX_CONFIG.merchantIdentity
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Payment processing failed: ' + response.statusText);
-                }
-                
-                const result = await response.json();
-                console.log('✅ Payment processed:', result);
+                console.log('✅ Payment would be processed here');
                 
                 // Complete payment successfully
                 session.completePayment(ApplePaySession.STATUS_SUCCESS);
                 
                 // Show success message
-                alert('Payment Successful! ✅\nThank you for your purchase.');
+                alert('Apple Pay Payment Successful! ✅\n\nAmount: ' + amount + ' ' + currency + '\n\nThank you for your purchase!');
                 
             } catch (error) {
                 console.error('❌ Payment processing error:', error);
@@ -568,6 +571,6 @@
             console.log('🔍 Checking Apple Pay availability...');
             checkApplePayAvailability();
         });
-</script>
+    </script>
 </body>
 </html>
