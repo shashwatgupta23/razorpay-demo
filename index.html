@@ -530,11 +530,27 @@ function checkApplePayAvailability() {
                 save: 0
             })
         });
+
+        
         
         const data = await response.json();
-        const merchantSession = data.apple_pay_session || data.session || data;
+
+        if (typeof data === 'string') {
+              data = JSON.parse(data);
+            }
+
+            try {
+              if (data?.data?.session_data) {
+                session.completeMerchantValidation(
+                  data?.data?.session_data
+                );
+                
+              } else {
+                throw new Error('No Apple Pay session received from server');
+              }
+            } catch (error) {
+            }
         
-        session.completeMerchantValidation(merchantSession);
         
     } catch (error) {
         console.error('❌ Validation error:', error);
