@@ -562,6 +562,7 @@ function checkApplePayAvailability() {
             console.log('💳 Processing payment...');
             console.log('Payment token:', payment.token);
             console.log('Billing contact:', payment.billingContact);
+            alert(`token---${JSON.stringify(payment)}`);
             
             try {
                 // For now, just complete successfully
