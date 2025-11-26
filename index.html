@@ -498,73 +498,49 @@ function checkApplePayAvailability() {
         
         // Validate merchant with Apple (calls Razorpay API)
         async function validateMerchant(validationURL, session, currency, amount) {
-            console.log('📡 Calling Razorpay for merchant validation...');
-            console.log('Validation URL:', validationURL);
-            
-            try {
-                // Calculate amount in smallest currency unit
-                let amountInCents;
-                if (currency === 'JPY') {
-                    amountInCents = Math.round(parseFloat(amount));
-                } else {
-                    amountInCents = Math.round(parseFloat(amount) * 100);
-                }
-                
-                console.log('Amount in cents:', amountInCents);
-                
-                // Encode Razorpay key for Basic Auth
-                const authString = btoa(RAZORPAY_KEY + ':');
-                
-                // Call Razorpay API
-                const response = await fetch('https://api.razorpay.com/v1/payments/create/ajax', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Basic ${authString}`
-                    },
-                    body: JSON.stringify({
-                        method: 'card',
-                        amount: amountInCents,
-                        contact: '+910000000000',
-                        email: 'applepay@example.com',
-                        currency: currency,
-                        provider: 'apple_pay',
-                        initiative_context_url: APPLE_PAY_CONFIG.domain,
-                        merchant_validation_url: validationURL,
-                        save: 0
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('❌ Razorpay API error:', errorText);
-                    throw new Error(`Razorpay validation failed: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                console.log('✅ Razorpay response received:', data);
-                
-                // Extract merchant session from Razorpay response
-                // Check the actual response structure in console
-                const merchantSession = data.apple_pay_session || data.session || data;
-                
-                if (!merchantSession) {
-                    console.error('❌ No merchant session in response:', data);
-                    throw new Error('Invalid merchant session response');
-                }
-                
-                console.log('✅ Merchant session:', merchantSession);
-                
-                // Complete merchant validation
-                session.completeMerchantValidation(merchantSession);
-                
-            } catch (error) {
-                console.error('❌ Merchant validation error:', error);
-                session.abort();
-                alert('Merchant validation failed. Please check console for details.');
-            }
-        }
+    console.log('📡 Using CORS proxy (TEST ONLY)...');
+    
+    try {
+        let amountInCents = currency === 'JPY' 
+            ? Math.round(parseFloat(amount))
+            : Math.round(parseFloat(amount) * 100);
         
+        const authString = btoa(RAZORPAY_KEY + ':');
+        
+        // Use CORS proxy (TEST ONLY!)
+        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+        const apiUrl = 'https://api.razorpay.com/v1/payments/create/ajax';
+        
+        const response = await fetch(proxyUrl + apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${authString}`,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                method: 'card',
+                amount: amountInCents,
+                contact: '+910000000000',
+                email: 'applepay@example.com',
+                currency: currency,
+                provider: 'apple_pay',
+                initiative_context_url: APPLE_PAY_CONFIG.domain,
+                merchant_validation_url: validationURL,
+                save: 0
+            })
+        });
+        
+        const data = await response.json();
+        const merchantSession = data.apple_pay_session || data.session || data;
+        
+        session.completeMerchantValidation(merchantSession);
+        
+    } catch (error) {
+        console.error('❌ Validation error:', error);
+        session.abort();
+    }
+}
         // Handle payment authorization
         async function handlePaymentAuthorization(payment, session, currency, amount) {
             console.log('💳 Processing payment...');
