@@ -321,7 +321,7 @@
 
             // Razorpay Configuration
             const options = {
-                "key": "rzp_live_sg_mA1ssIHKmWatUP",
+                "key": "rzp_live_fQOafVJoJqscJ6",
                 "amount": amount,
                 "currency": currency,
                 "name": "Coffee Shop",
@@ -371,8 +371,8 @@
         // APPLE PAY IMPLEMENTATION
         // ============================================
         
-        // Razorpay Singapore Key for Apple Pay
-        const RAZORPAY_KEY = 'rzp_live_sg_mA1ssIHKmWatUP';
+        // Razorpay Malaysia Key for Apple Pay
+        const RAZORPAY_KEY = 'rzp_live_fQOafVJoJqscJ6';
         
         // Configuration
         const APPLE_PAY_CONFIG = {
@@ -392,7 +392,7 @@ function checkApplePayAvailability() {
             console.log('✅ Apple Pay can make payments');
             
             // Check if user has active Apple Pay cards
-            const merchantIdentifier = 'dc562693173b47ec12c8cf72ca32bc58bd90936c27418f2b4eebd089';
+            const merchantIdentifier = '5aec1872355144c0f34bd7ca8e54c185b9258e51c16fef38bcd3f9ad';
             
             ApplePaySession.canMakePaymentsWithActiveCard(merchantIdentifier)
                 .then((canMakePayments) => {
