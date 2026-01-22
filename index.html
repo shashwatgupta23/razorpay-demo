@@ -392,7 +392,7 @@ function checkApplePayAvailability() {
             console.log('✅ Apple Pay can make payments');
             
             // Check if user has active Apple Pay cards
-            const merchantIdentifier = '5aec1872355144c0f34bd7ca8e54c185b9258e51c16fef38bcd3f9ad';
+            const merchantIdentifier = 'dc562693173b47ec12c8cf72ca32bc58bd90936c27418f2b4eebd089';
             
             ApplePaySession.canMakePaymentsWithActiveCard(merchantIdentifier)
                 .then((canMakePayments) => {
