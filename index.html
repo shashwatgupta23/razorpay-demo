@@ -526,8 +526,10 @@
         // S2S API Configuration
         const S2S_CONFIG = {
             apiKey: 'rzp_live_sg_TMe0NITbhAhyPJ',
-            apiSecret: 'qIhRQTgERlxeYluI0jKyabaP',
-            apiUrl: 'https://api.razorpay.com/v1/payments'
+            // Backend proxy URL - update this with your deployed backend URL
+            // For local testing: 'http://localhost:3000/api/create-payment'
+            // For production: 'https://your-app.vercel.app/api/create-payment'
+            apiUrl: 'http://localhost:3000/api/create-payment'
         };
         
         // Store Razorpay Shield Session ID
@@ -681,12 +683,11 @@
                 
                 console.log('📤 Sending payment request...');
                 
-                // Make API call to Razorpay
+                // Make API call to backend proxy (which calls Razorpay)
                 const response = await fetch(S2S_CONFIG.apiUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Basic ' + btoa(S2S_CONFIG.apiKey + ':' + S2S_CONFIG.apiSecret)
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(paymentRequest)
                 });
