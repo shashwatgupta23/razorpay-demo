@@ -148,6 +148,156 @@
         .cta-button:active {
             transform: translateY(0) scale(1);
         }
+
+        .cta-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* ========================================== */
+        /* S2S CARD PAYMENT FORM STYLES */
+        /* ========================================== */
+        
+        .s2s-section {
+            margin-top: 3rem;
+            padding-top: 3rem;
+            border-top: 1px solid #333333;
+        }
+        
+        .s2s-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            letter-spacing: 0.02em;
+        }
+        
+        .s2s-description {
+            font-size: 0.9rem;
+            color: #999999;
+            margin-bottom: 2rem;
+        }
+        
+        .card-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+        
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #cccccc;
+            margin-bottom: 8px;
+            letter-spacing: 0.02em;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #333333;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #111111;
+            color: #ffffff;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        
+        .form-group input:focus {
+            border-color: #ffffff;
+            background: #1a1a1a;
+        }
+        
+        .form-group input::placeholder {
+            color: #555555;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .pay-button-s2s {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: #ffffff;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            letter-spacing: 0.02em;
+            margin-top: 10px;
+        }
+        
+        .pay-button-s2s:hover:not(:disabled) {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(76, 175, 80, 0.3);
+            background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+        }
+        
+        .pay-button-s2s:active:not(:disabled) {
+            transform: translateY(0) scale(1);
+        }
+        
+        .pay-button-s2s:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .shield-status {
+            font-size: 0.75rem;
+            color: #666666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        .shield-status.success {
+            color: #4CAF50;
+        }
+        
+        .shield-status.error {
+            color: #f44336;
+        }
+        
+        .error-message {
+            color: #f44336;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(244, 67, 54, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .success-message {
+            color: #4CAF50;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
         
         .footer {
             position: fixed;
@@ -207,6 +357,14 @@
                 min-width: 260px;
                 padding: 18px 40px;
             }
+            
+            .form-row, .form-row-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-form {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -235,7 +393,7 @@
             
             <div class="payment-buttons">
                 <button class="cta-button" onclick="initiatePayment()">
-                    Buy with Razorpay
+                    Buy with Razorpay Checkout
                 </button>
     
                 <div class="divider">OR</div>
@@ -249,16 +407,132 @@
                 </apple-pay-button>
             </div>
         </div>
+        
+        <!-- ========================================== -->
+        <!-- S2S CARD PAYMENT SECTION -->
+        <!-- ========================================== -->
+        <div class="s2s-section">
+            <div class="divider">OR PAY WITH CARD (S2S)</div>
+            
+            <h2 class="s2s-header">Server-to-Server Card Payment</h2>
+            <p class="s2s-description">Enter your card details below for direct payment processing</p>
+            
+            <form class="card-form" id="s2s-card-form" onsubmit="handleS2SPayment(event)">
+                <div class="form-group">
+                    <label for="card-number">Card Number</label>
+                    <input 
+                        type="text" 
+                        id="card-number" 
+                        placeholder="4242 4242 4242 4242" 
+                        maxlength="19"
+                        required
+                        autocomplete="cc-number"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="card-holder">Card Holder Name</label>
+                    <input 
+                        type="text" 
+                        id="card-holder" 
+                        placeholder="John Doe" 
+                        required
+                        autocomplete="cc-name"
+                    >
+                </div>
+                
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label for="expiry-month">Month</label>
+                        <input 
+                            type="text" 
+                            id="expiry-month" 
+                            placeholder="MM" 
+                            maxlength="2"
+                            required
+                            autocomplete="cc-exp-month"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expiry-year">Year</label>
+                        <input 
+                            type="text" 
+                            id="expiry-year" 
+                            placeholder="YY" 
+                            maxlength="2"
+                            required
+                            autocomplete="cc-exp-year"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cvv">CVV</label>
+                        <input 
+                            type="text" 
+                            id="cvv" 
+                            placeholder="123" 
+                            maxlength="4"
+                            required
+                            autocomplete="cc-csc"
+                        >
+                    </div>
+                </div>
+                
+                <button type="submit" class="pay-button-s2s" id="s2s-pay-button">
+                    Pay Now (S2S)
+                </button>
+                
+                <div class="shield-status" id="shield-status">
+                    Initializing Razorpay Shield...
+                </div>
+                
+                <div class="error-message" id="error-message"></div>
+                <div class="success-message" id="success-message"></div>
+            </form>
+        </div>
     </div>
 
     <div class="footer">
         Razorpay does not endorse this page
     </div>
 
-    <!-- IMPORTANT: Razorpay Checkout Script -->
+    <!-- Razorpay Checkout Script -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
+    <!-- ========================================== -->
+    <!-- RAZORPAY SHIELD INTEGRATION -->
+    <!-- ========================================== -->
     <script>
+        // Configure Shield
+        window.RazorpayShield = {
+            config: {
+                providers: [{
+                    name: "load_razorpay_session",
+                    enabled: true
+                }],
+            },
+        };
+    </script>
+    
+    <!-- Load Shield Library -->
+    <script src="https://checkout.razorpay.com/v1/shield.js"></script>
+    
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        
+        // S2S API Configuration
+        const S2S_CONFIG = {
+            apiKey: 'rzp_live_sg_TMe0NITbhAhyPJ',
+            apiSecret: 'qIhRQTgERlxeYluI0jKyabaP',
+            apiUrl: 'https://api.razorpay.com/v1/payments'
+        };
+        
+        // Store Razorpay Shield Session ID
+        let razorpaySessionId = null;
+        
         // Exchange rates (approximate - in real app, fetch from API)
         const exchangeRates = {
             'SGD': 1.00,
@@ -272,7 +546,31 @@
             'MYR': 3.42
         };
 
-        // Debug: Log when page loads
+        // ============================================
+        // INITIALIZE RAZORPAY SHIELD
+        // ============================================
+        
+        (async function initializeShield() {
+            console.log('🛡️ Initializing Razorpay Shield...');
+            const shieldStatus = document.getElementById('shield-status');
+            
+            try {
+                razorpaySessionId = await RazorpayShield.loadRazorpaySession(S2S_CONFIG.apiKey);
+                console.log('✅ Shield Session ID:', razorpaySessionId);
+                
+                shieldStatus.textContent = '✅ Shield Active - Device fingerprint ready';
+                shieldStatus.classList.add('success');
+            } catch (error) {
+                console.error('❌ Shield initialization failed:', error);
+                shieldStatus.textContent = '⚠️ Shield initialization failed (payment will still work)';
+                shieldStatus.classList.add('error');
+            }
+        })();
+
+        // ============================================
+        // PRICE CALCULATION
+        // ============================================
+        
         console.log('Premium page loaded');
         console.log('Available currencies:', Object.keys(exchangeRates));
         
@@ -283,7 +581,6 @@
             const basePrice = 1.00; // Base price in SGD
             const convertedPrice = (basePrice * exchangeRates[currency]);
             
-            // Format for currencies that don't use decimals
             let displayPrice;
             if (currency === 'JPY') {
                 displayPrice = Math.round(convertedPrice);
@@ -295,10 +592,171 @@
             document.getElementById('price').textContent = `${displayPrice} ${currency}`;
         }
 
+        // ============================================
+        // S2S CARD PAYMENT HANDLER
+        // ============================================
+        
+        async function handleS2SPayment(event) {
+            event.preventDefault();
+            
+            console.log('🔐 Initiating S2S Payment...');
+            
+            const payButton = document.getElementById('s2s-pay-button');
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
+            
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // Disable button
+            payButton.disabled = true;
+            payButton.textContent = 'Processing...';
+            
+            try {
+                // Get form values
+                const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
+                const cardHolder = document.getElementById('card-holder').value;
+                const expiryMonth = document.getElementById('expiry-month').value.padStart(2, '0');
+                const expiryYear = document.getElementById('expiry-year').value;
+                const cvv = document.getElementById('cvv').value;
+                
+                // Get currency and amount
+                const currency = document.getElementById('currency').value;
+                const basePrice = 1.00;
+                const convertedPrice = (basePrice * exchangeRates[currency]);
+                
+                // Convert to smallest currency unit
+                let amount;
+                if (currency === 'JPY') {
+                    amount = Math.round(convertedPrice);
+                } else {
+                    amount = Math.round(convertedPrice * 100);
+                }
+                
+                console.log('💳 Payment Details:', { currency, amount, cardHolder });
+                
+                // Validate Shield Session ID
+                if (!razorpaySessionId) {
+                    console.warn('⚠️ Shield Session ID not available, proceeding without it');
+                }
+                
+                // Build payment request
+                const paymentRequest = {
+                    amount: amount,
+                    currency: currency,
+                    contact: "+6591119111", // You can make this dynamic
+                    email: "customer@example.com", // You can make this dynamic
+                    method: "card",
+                    card: {
+                        number: cardNumber,
+                        name: cardHolder,
+                        expiry_month: expiryMonth,
+                        expiry_year: expiryYear,
+                        cvv: cvv
+                    },
+                    authentication: {
+                        authentication_channel: "browser"
+                    },
+                    browser: {
+                        java_enabled: navigator.javaEnabled(),
+                        javascript_enabled: true,
+                        timezone_offset: new Date().getTimezoneOffset(),
+                        color_depth: screen.colorDepth,
+                        screen_width: screen.width,
+                        screen_height: screen.height
+                    },
+                    ip: "0.0.0.0", // In production, get from server
+                    referer: window.location.href,
+                    user_agent: navigator.userAgent
+                };
+                
+                // Add Shield Session ID if available
+                if (razorpaySessionId) {
+                    paymentRequest.device_fingerprint = {
+                        gateway_session_id: razorpaySessionId
+                    };
+                    console.log('🛡️ Shield Session ID included in payment');
+                }
+                
+                console.log('📤 Sending payment request...');
+                
+                // Make API call to Razorpay
+                const response = await fetch(S2S_CONFIG.apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa(S2S_CONFIG.apiKey + ':' + S2S_CONFIG.apiSecret)
+                    },
+                    body: JSON.stringify(paymentRequest)
+                });
+                
+                const result = await response.json();
+                console.log('📥 Payment Response:', result);
+                
+                if (response.ok && result.status === 'captured') {
+                    // Payment successful
+                    console.log('✅ Payment Successful!');
+                    successMessage.textContent = `✅ Payment Successful! Payment ID: ${result.id}`;
+                    successMessage.style.display = 'block';
+                    
+                    // Clear form
+                    document.getElementById('s2s-card-form').reset();
+                    
+                } else if (result.status === 'authorized') {
+                    // Payment authorized (might need 3DS)
+                    console.log('✅ Payment Authorized (may require 3DS)');
+                    successMessage.textContent = `✅ Payment Authorized! Payment ID: ${result.id}`;
+                    successMessage.style.display = 'block';
+                    
+                    // Handle 3DS if needed
+                    if (result.authentication && result.authentication.authentication_url) {
+                        console.log('🔐 3DS Authentication required');
+                        window.open(result.authentication.authentication_url, '_blank');
+                    }
+                    
+                } else {
+                    // Payment failed
+                    throw new Error(result.error?.description || 'Payment failed');
+                }
+                
+            } catch (error) {
+                console.error('❌ Payment Error:', error);
+                errorMessage.textContent = `❌ Payment Failed: ${error.message}`;
+                errorMessage.style.display = 'block';
+            } finally {
+                // Re-enable button
+                payButton.disabled = false;
+                payButton.textContent = 'Pay Now (S2S)';
+            }
+        }
+        
+        // ============================================
+        // CARD NUMBER FORMATTING
+        // ============================================
+        
+        document.getElementById('card-number').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedValue;
+        });
+        
+        // Only allow numbers in numeric fields
+        ['card-number', 'expiry-month', 'expiry-year', 'cvv'].forEach(id => {
+            document.getElementById(id).addEventListener('keypress', function(e) {
+                if (!/[0-9]/.test(e.key)) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        // ============================================
+        // EXISTING RAZORPAY CHECKOUT INTEGRATION
+        // ============================================
+        
         function initiatePayment() {
             console.log('initiatePayment called');
             
-            // Check if Razorpay is loaded
             if (typeof Razorpay === 'undefined') {
                 alert('❌ Razorpay script not loaded. Please check your internet connection and try again.');
                 console.error('Razorpay is not defined');
@@ -306,10 +764,9 @@
             }
 
             const currency = document.getElementById('currency').value;
-            const basePrice = 1.00; // Base price in SGD
+            const basePrice = 1.00;
             const convertedPrice = (basePrice * exchangeRates[currency]);
             
-            // Convert to smallest currency unit (paise/cents)
             let amount;
             if (currency === 'JPY') {
                 amount = Math.round(convertedPrice);
@@ -319,7 +776,6 @@
 
             console.log('Payment details:', {currency, convertedPrice, amount});
 
-            // Razorpay Configuration
             const options = {
                 "key": "rzp_live_sg_OEpIYO2fhq6fLD",
                 "amount": amount,
@@ -366,67 +822,57 @@
         };
     </script>
     
+    <!-- ============================================ -->
+    <!-- APPLE PAY IMPLEMENTATION -->
+    <!-- ============================================ -->
     <script>
-        // ============================================
-        // APPLE PAY IMPLEMENTATION
-        // ============================================
-        
-        // Razorpay Singapore Key for Apple Pay
         const RAZORPAY_KEY = 'rzp_live_sg_OEpIYO2fhq6fLD';
         
-        // Configuration
         const APPLE_PAY_CONFIG = {
             domain: "shashwatgupta23.github.io",
             displayName: "Coffee Shop"
         };
         
-        // Check if Apple Pay is available with enhanced capabilities check
-        // Check if Apple Pay is available with enhanced capabilities check
-function checkApplePayAvailability() {
-    if (window.ApplePaySession) {
-        // Check if Apple Pay is supported on this device/browser
-        const applePayCapabilities = ApplePaySession.supportsVersion(6);
-        
-        if (applePayCapabilities && ApplePaySession.canMakePayments()) {
-            console.log('✅ Apple Pay is available (Version 6 supported)');
-            console.log('✅ Apple Pay can make payments');
-            
-            // Check if user has active Apple Pay cards
-            const merchantIdentifier = 'dc562693173b47ec12c8cf72ca32bc58bd90936c27418f2b4eebd089';
-            
-            ApplePaySession.canMakePaymentsWithActiveCard(merchantIdentifier)
-                .then((canMakePayments) => {
-                    if (canMakePayments) {
-                        console.log('✅ User has active Apple Pay cards');
-                    } else {
-                        console.log('⚠️ User needs to add cards to Apple Pay');
-                        // Still show button - user can add card during payment
-                    }
-                })
-                .catch((error) => {
-                    console.log('⚠️ Could not check for active cards:', error);
-                    // Still show button even if check fails
-                });
-            
-            document.getElementById('apple-pay-button').style.display = 'inline-block';
-            return true;
-        } else if (!applePayCapabilities) {
-            console.log('❌ Apple Pay Version 6 not supported');
-            document.getElementById('apple-pay-button').style.display = 'none';
-            return false;
-        } else {
-            console.log('⚠️ Apple Pay not set up on this device');
-            document.getElementById('apple-pay-button').style.display = 'none';
-            return false;
+        function checkApplePayAvailability() {
+            if (window.ApplePaySession) {
+                const applePayCapabilities = ApplePaySession.supportsVersion(6);
+                
+                if (applePayCapabilities && ApplePaySession.canMakePayments()) {
+                    console.log('✅ Apple Pay is available (Version 6 supported)');
+                    console.log('✅ Apple Pay can make payments');
+                    
+                    const merchantIdentifier = 'dc562693173b47ec12c8cf72ca32bc58bd90936c27418f2b4eebd089';
+                    
+                    ApplePaySession.canMakePaymentsWithActiveCard(merchantIdentifier)
+                        .then((canMakePayments) => {
+                            if (canMakePayments) {
+                                console.log('✅ User has active Apple Pay cards');
+                            } else {
+                                console.log('⚠️ User needs to add cards to Apple Pay');
+                            }
+                        })
+                        .catch((error) => {
+                            console.log('⚠️ Could not check for active cards:', error);
+                        });
+                    
+                    document.getElementById('apple-pay-button').style.display = 'inline-block';
+                    return true;
+                } else if (!applePayCapabilities) {
+                    console.log('❌ Apple Pay Version 6 not supported');
+                    document.getElementById('apple-pay-button').style.display = 'none';
+                    return false;
+                } else {
+                    console.log('⚠️ Apple Pay not set up on this device');
+                    document.getElementById('apple-pay-button').style.display = 'none';
+                    return false;
+                }
+            } else {
+                console.log('❌ Apple Pay not supported on this browser');
+                document.getElementById('apple-pay-button').style.display = 'none';
+                return false;
+            }
         }
-    } else {
-        console.log('❌ Apple Pay not supported on this browser');
-        document.getElementById('apple-pay-button').style.display = 'none';
-        return false;
-    }
-}
         
-        // Initialize Apple Pay when button is clicked
         function initiateApplePay() {
             console.log('🍎 Apple Pay initiated');
             
@@ -439,7 +885,6 @@ function checkApplePayAvailability() {
             const basePrice = 1.00;
             const convertedPrice = (basePrice * exchangeRates[currency]);
             
-            // Format amount for Apple Pay
             let displayAmount;
             if (currency === 'JPY') {
                 displayAmount = Math.round(convertedPrice).toString();
@@ -449,7 +894,6 @@ function checkApplePayAvailability() {
             
             console.log('💰 Payment amount:', displayAmount, currency);
             
-            // Create Apple Pay payment request
             const request = {
                 countryCode: 'US',
                 currencyCode: currency,
@@ -465,28 +909,23 @@ function checkApplePayAvailability() {
             
             console.log('📋 Apple Pay request:', request);
             
-            // Create Apple Pay session
             try {
                 const session = new ApplePaySession(6, request);
                 
-                // Handle merchant validation
                 session.onvalidatemerchant = function(event) {
                     console.log('🔐 Validating merchant...');
                     validateMerchant(event.validationURL, session, currency, displayAmount);
                 };
                 
-                // Handle payment authorization
                 session.onpaymentauthorized = function(event) {
                     console.log('✅ Payment authorized');
                     handlePaymentAuthorization(event.payment, session, currency, displayAmount);
                 };
                 
-                // Handle cancel
                 session.oncancel = function(event) {
                     console.log('❌ Apple Pay cancelled');
                 };
                 
-                // Begin the session
                 session.begin();
                 console.log('🚀 Apple Pay session started');
                 
@@ -496,97 +935,80 @@ function checkApplePayAvailability() {
             }
         }
         
-        // Validate merchant with Apple (calls Razorpay API)
         async function validateMerchant(validationURL, session, currency, amount) {
-    console.log('📡 Using CORS proxy (TEST ONLY)...');
-    
-    try {
-        let amountInCents = currency === 'JPY' 
-            ? Math.round(parseFloat(amount))
-            : Math.round(parseFloat(amount) * 100);
-        
-        const authString = btoa(RAZORPAY_KEY + ':');
-        
-        // Use CORS proxy (TEST ONLY!)
-        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-        const apiUrl = 'https://api.razorpay.com/v1/payments/create/ajax';
-        
-        const response = await fetch(proxyUrl + apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Basic ${authString}`,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({
-                method: 'card',
-                amount: amountInCents,
-                contact: '+910000000000',
-                email: 'applepay@example.com',
-                currency: currency,
-                provider: 'apple_pay',
-                initiative_context_url: APPLE_PAY_CONFIG.domain,
-                merchant_validation_url: validationURL,
-                save: 0
-            })
-        });
-
-        
-        
-        const data = await response.json();
-
-        if (typeof data === 'string') {
-              data = JSON.parse(data);
-            }
-
+            console.log('📡 Using CORS proxy (TEST ONLY)...');
+            
             try {
-              if (data?.data?.session_data) {
-                session.completeMerchantValidation(
-                  data?.data?.session_data
-                );
+                let amountInCents = currency === 'JPY' 
+                    ? Math.round(parseFloat(amount))
+                    : Math.round(parseFloat(amount) * 100);
                 
-              } else {
-                throw new Error('No Apple Pay session received from server');
-              }
+                const authString = btoa(RAZORPAY_KEY + ':');
+                
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const apiUrl = 'https://api.razorpay.com/v1/payments/create/ajax';
+                
+                const response = await fetch(proxyUrl + apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${authString}`,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        method: 'card',
+                        amount: amountInCents,
+                        contact: '+910000000000',
+                        email: 'applepay@example.com',
+                        currency: currency,
+                        provider: 'apple_pay',
+                        initiative_context_url: APPLE_PAY_CONFIG.domain,
+                        merchant_validation_url: validationURL,
+                        save: 0
+                    })
+                });
+                
+                const data = await response.json();
+
+                if (typeof data === 'string') {
+                    data = JSON.parse(data);
+                }
+
+                try {
+                    if (data?.data?.session_data) {
+                        session.completeMerchantValidation(data?.data?.session_data);
+                    } else {
+                        throw new Error('No Apple Pay session received from server');
+                    }
+                } catch (error) {
+                    console.error('Validation error:', error);
+                }
+                
             } catch (error) {
+                console.error('❌ Validation error:', error);
+                session.abort();
             }
+        }
         
-        
-    } catch (error) {
-        console.error('❌ Validation error:', error);
-        session.abort();
-    }
-}
-        // Handle payment authorization
         async function handlePaymentAuthorization(payment, session, currency, amount) {
             console.log('💳 Processing payment...');
             console.log('Payment token:', payment.token);
             console.log('Billing contact:', payment.billingContact);
-            alert(`token---${JSON.stringify(payment)}`);
             
             try {
-                // For now, just complete successfully
-                // In production, you'd send this to your backend to process with Razorpay/Finix
-                
                 console.log('✅ Payment would be processed here');
                 
-                // Complete payment successfully
                 session.completePayment(ApplePaySession.STATUS_SUCCESS);
                 
-                // Show success message
                 alert('Apple Pay Payment Successful! ✅\n\nAmount: ' + amount + ' ' + currency + '\n\nThank you for your purchase!');
                 
             } catch (error) {
                 console.error('❌ Payment processing error:', error);
-                
-                // Complete payment with failure
                 session.completePayment(ApplePaySession.STATUS_FAILURE);
-                
                 alert('Payment failed. Please try again.');
             }
         }
         
-        // Check Apple Pay availability on page load
         window.addEventListener('load', function() {
             console.log('🔍 Checking Apple Pay availability...');
             checkApplePayAvailability();
@@ -594,17 +1016,3 @@ function checkApplePayAvailability() {
     </script>
 </body>
 </html>
-```
-
-## ✅ Key Changes:
-
-1. **`supportsVersion(6)`** - Checks for ApplePaySession v6 support
-2. **Better logging** - Shows exact capabilities
-3. **Optional card check** - Commented out `canMakePaymentsWithActiveCard()` (needs actual Apple Merchant ID)
-
-## 🧪 Test it:
-
-Open in Safari and check console - you should now see:
-```
-✅ Apple Pay is available (Version 6 supported)
-✅ Apple Pay can make payments
