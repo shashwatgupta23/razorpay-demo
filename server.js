@@ -722,29 +722,34 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================
-// START SERVER
+// START SERVER (Local Development)
 // ============================================
 
-app.listen(PORT, '127.0.0.1', () => {
-  console.log('╔════════════════════════════════════════════════════╗');
-  console.log('║   Razorpay S2S Payment Server                      ║');
-  console.log('╚════════════════════════════════════════════════════╝');
-  console.log('');
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log('');
-  console.log('📋 Available Endpoints:');
-  console.log(`   POST http://localhost:${PORT}/api/create-payment`);
-  console.log(`   POST http://localhost:${PORT}/api/create-applepay-payment`);
-  console.log(`   POST http://localhost:${PORT}/api/validate-apple-merchant`);
-  console.log(`   GET  http://localhost:${PORT}/health`);
-  console.log('');
-  console.log('🔑 Configured Geographies:');
-  Object.keys(RAZORPAY_CONFIGS).forEach(country => {
-    const status = RAZORPAY_CONFIGS[country].keySecret ? '✅' : '❌';
-    console.log(`   ${country}: ${status} ${RAZORPAY_CONFIGS[country].currency}`);
+if (require.main === module) {
+  app.listen(PORT, '127.0.0.1', () => {
+    console.log('╔════════════════════════════════════════════════════╗');
+    console.log('║   Razorpay S2S Payment Server                      ║');
+    console.log('╚════════════════════════════════════════════════════╝');
+    console.log('');
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log('');
+    console.log('📋 Available Endpoints:');
+    console.log(`   POST http://localhost:${PORT}/api/create-payment`);
+    console.log(`   POST http://localhost:${PORT}/api/create-applepay-payment`);
+    console.log(`   POST http://localhost:${PORT}/api/validate-apple-merchant`);
+    console.log(`   GET  http://localhost:${PORT}/health`);
+    console.log('');
+    console.log('🔑 Configured Geographies:');
+    Object.keys(RAZORPAY_CONFIGS).forEach(country => {
+      const status = RAZORPAY_CONFIGS[country].keySecret ? '✅' : '❌';
+      console.log(`   ${country}: ${status} ${RAZORPAY_CONFIGS[country].currency}`);
+    });
+    console.log('');
+    console.log('════════════════════════════════════════════════════');
   });
-  console.log('');
-  console.log('════════════════════════════════════════════════════');
-});
+}
+
+// Export for Vercel serverless
+module.exports = app;
 
 module.exports = app;

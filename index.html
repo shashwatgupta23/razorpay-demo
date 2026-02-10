@@ -378,7 +378,10 @@
  <script src="https://checkout.razorpay.com/v1/shield.js"></script>
 
  <script>
-  const API_URL = 'http://localhost:3000';
+  // Auto-detect API URL based on environment
+  const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000'
+    : window.location.origin;
   let razorpaySessionId = null;
 
   // Razorpay key IDs by country (for Checkout)

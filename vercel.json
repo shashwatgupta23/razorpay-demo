@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "RAZORPAY_KEY_ID_MY": "@razorpay_key_id_my",
+    "RAZORPAY_KEY_SECRET_MY": "@razorpay_key_secret_my",
+    "RAZORPAY_KEY_ID_SG": "@razorpay_key_id_sg",
+    "RAZORPAY_KEY_SECRET_SG": "@razorpay_key_secret_sg",
+    "RAZORPAY_KEY_ID_US": "@razorpay_key_id_us",
+    "RAZORPAY_KEY_SECRET_US": "@razorpay_key_secret_us",
+    "RAZORPAY_KEY_ID_IN": "@razorpay_key_id_in",
+    "RAZORPAY_KEY_SECRET_IN": "@razorpay_key_secret_in"
+  }
+}
