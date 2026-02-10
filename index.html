@@ -1,1019 +1,579 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        apple-pay-button {
-            --apple-pay-button-width: 280px;
-            --apple-pay-button-height: 50px;
-            --apple-pay-button-border-radius: 50px;
-            --apple-pay-button-padding: 0px 0px;
-            --apple-pay-button-box-sizing: border-box;
-            margin-top: 20px;
-            display: inline-block;
-        }
+ <script src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"></script>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Razorpay Payment Integration Demo</title>
+ <style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-        .payment-buttons {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .divider {
-            color: #666666;
-            font-size: 0.9rem;
-            margin: 10px 0;
-            font-weight: 300;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #000000;
-            color: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow-x: hidden;
-        }
-        
-        .container {
-            max-width: 600px;
-            width: 90%;
-            text-align: center;
-            padding: 40px 20px;
-        }
-        
-        .hero-text {
-            font-size: clamp(4rem, 12vw, 8rem);
-            font-weight: 900;
-            line-height: 0.85;
-            letter-spacing: -0.05em;
-            margin-bottom: 2rem;
-            background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .subtitle {
-            font-size: clamp(1.2rem, 3vw, 1.8rem);
-            font-weight: 300;
-            color: #999999;
-            margin-bottom: 4rem;
-            letter-spacing: 0.02em;
-        }
-        
-        .product-section {
-            margin-bottom: 4rem;
-        }
-        
-        .currency-selector {
-            margin: 3rem 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .currency-selector label {
-            font-size: 1rem;
-            font-weight: 500;
-            color: #cccccc;
-            letter-spacing: 0.02em;
-        }
-        
-        .currency-selector select {
-            padding: 12px 20px;
-            border: 1px solid #333333;
-            border-radius: 12px;
-            font-size: 16px;
-            background: #111111;
-            color: #ffffff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            outline: none;
-            min-width: 200px;
-        }
-        
-        .currency-selector select:hover {
-            border-color: #555555;
-            background: #1a1a1a;
-        }
-        
-        .currency-selector select:focus {
-            border-color: #ffffff;
-        }
-        
-        .price {
-            font-size: clamp(2.5rem, 8vw, 4rem);
-            font-weight: 700;
-            margin: 3rem 0;
-            letter-spacing: -0.02em;
-        }
-        
-        .cta-button {
-            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-            color: #000000;
-            border: none;
-            padding: 20px 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            letter-spacing: 0.02em;
-            min-width: 280px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .cta-button:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(255, 255, 255, 0.15);
-            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
-        }
-        
-        .cta-button:active {
-            transform: translateY(0) scale(1);
-        }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #000000;
+    min-height: 100vh;
+    padding: 60px 20px;
+    color: #ffffff;
+  }
 
-        .cta-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        /* ========================================== */
-        /* S2S CARD PAYMENT FORM STYLES */
-        /* ========================================== */
-        
-        .s2s-section {
-            margin-top: 3rem;
-            padding-top: 3rem;
-            border-top: 1px solid #333333;
-        }
-        
-        .s2s-header {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 1rem;
-            letter-spacing: 0.02em;
-        }
-        
-        .s2s-description {
-            font-size: 0.9rem;
-            color: #999999;
-            margin-bottom: 2rem;
-        }
-        
-        .card-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            text-align: left;
-        }
-        
-        .form-group label {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #cccccc;
-            margin-bottom: 8px;
-            letter-spacing: 0.02em;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #333333;
-            border-radius: 12px;
-            font-size: 16px;
-            background: #111111;
-            color: #ffffff;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-        
-        .form-group input:focus {
-            border-color: #ffffff;
-            background: #1a1a1a;
-        }
-        
-        .form-group input::placeholder {
-            color: #555555;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .form-row-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-        }
-        
-        .pay-button-s2s {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: #ffffff;
-            border: none;
-            padding: 18px 40px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            letter-spacing: 0.02em;
-            margin-top: 10px;
-        }
-        
-        .pay-button-s2s:hover:not(:disabled) {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(76, 175, 80, 0.3);
-            background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
-        }
-        
-        .pay-button-s2s:active:not(:disabled) {
-            transform: translateY(0) scale(1);
-        }
-        
-        .pay-button-s2s:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .shield-status {
-            font-size: 0.75rem;
-            color: #666666;
-            margin-top: 10px;
-            font-style: italic;
-        }
-        
-        .shield-status.success {
-            color: #4CAF50;
-        }
-        
-        .shield-status.error {
-            color: #f44336;
-        }
-        
-        .error-message {
-            color: #f44336;
-            font-size: 0.85rem;
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(244, 67, 54, 0.1);
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .success-message {
-            color: #4CAF50;
-            font-size: 0.85rem;
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(76, 175, 80, 0.1);
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .footer {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.8rem;
-            color: #444444;
-            letter-spacing: 0.05em;
-            font-weight: 300;
-        }
-        
-        /* Subtle animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .container > * {
-            animation: fadeInUp 0.8s ease-out forwards;
-        }
-        
-        .hero-text {
-            animation-delay: 0.1s;
-        }
-        
-        .subtitle {
-            animation-delay: 0.2s;
-        }
-        
-        .currency-selector {
-            animation-delay: 0.3s;
-        }
-        
-        .price {
-            animation-delay: 0.4s;
-        }
-        
-        .cta-button {
-            animation-delay: 0.5s;
-        }
-        
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            .currency-selector {
-                flex-direction: column;
-                gap: 0.8rem;
-            }
-            
-            .cta-button {
-                min-width: 260px;
-                padding: 18px 40px;
-            }
-            
-            .form-row, .form-row-3 {
-                grid-template-columns: 1fr;
-            }
-            
-            .card-form {
-                max-width: 100%;
-            }
-        }
-    </style>
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header p {
+    font-size: 1.125rem;
+    color: #86868b;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  .config-section {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 40px;
+    margin-bottom: 30px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .config-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: #f5f5f7;
+    letter-spacing: -0.02em;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    font-weight: 500;
+    color: #86868b;
+    margin-bottom: 10px;
+    font-size: 0.875rem;
+    letter-spacing: -0.01em;
+  }
+
+  .form-group select,
+  .form-group input {
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    font-size: 16px;
+    color: #ffffff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+  }
+
+  .form-group select:focus,
+  .form-group input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+  }
+
+  .form-group select option {
+    background: #1d1d1f;
+    color: #ffffff;
+  }
+
+  .payment-section {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 40px;
+    margin-bottom: 30px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .payment-section h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #f5f5f7;
+    letter-spacing: -0.03em;
+  }
+
+  .payment-section .subtitle {
+    color: #86868b;
+    margin-bottom: 30px;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+  }
+
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    margin: 40px 0;
+  }
+
+  .pay-button {
+    width: 100%;
+    padding: 16px;
+    background: #ffffff;
+    color: #000000;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: -0.01em;
+    font-family: inherit;
+  }
+
+  .pay-button:hover:not(:disabled) {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  .pay-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  apple-pay-button {
+    --apple-pay-button-width: 100%;
+    --apple-pay-button-height: 52px;
+    --apple-pay-button-border-radius: 12px;
+    margin-top: 0;
+  }
+
+  .card-input {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    font-size: 16px;
+    color: #ffffff;
+    margin-bottom: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+  }
+
+  .card-input::placeholder {
+    color: #86868b;
+  }
+
+  .card-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+  }
+
+  .form-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+  .status-message {
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    display: none;
+    font-size: 0.9375rem;
+    letter-spacing: -0.01em;
+  }
+
+  .status-message.show {
+    display: block;
+  }
+
+  .status-message.success {
+    background: rgba(52, 199, 89, 0.15);
+    color: #32d74b;
+    border: 1px solid rgba(52, 199, 89, 0.3);
+  }
+
+  .status-message.error {
+    background: rgba(255, 69, 58, 0.15);
+    color: #ff453a;
+    border: 1px solid rgba(255, 69, 58, 0.3);
+  }
+
+  .payment-method-section {
+    margin-bottom: 35px;
+  }
+
+  .payment-method-section h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #f5f5f7;
+    letter-spacing: -0.02em;
+  }
+
+  .payment-method-section p {
+    color: #86868b;
+    font-size: 0.9375rem;
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  @media (max-width: 768px) {
+    .form-row, .form-row-3 {
+      grid-template-columns: 1fr;
+    }
+
+    .header h1 {
+      font-size: 2.25rem;
+    }
+
+    .config-section,
+    .payment-section {
+      padding: 30px 24px;
+    }
+  }
+ </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="hero-text">Coffee</h1>
-        <p class="subtitle">Black, just how you like it</p>
-        
-        <div class="product-section">
-            <div class="currency-selector">
-                <label for="currency">Currency</label>
-                <select id="currency" onchange="updatePrice()">
-                    <option value="SGD">SGD</option>
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
-                    <option value="INR">INR</option>
-                    <option value="JPY">JPY</option>
-                    <option value="AUD">AUD</option>
-                    <option value="CAD">CAD</option>
-                    <option value="MYR">MYR</option>
-                </select>
-            </div>
-            
-            <div class="price" id="price">1.00 SGD</div>
-            
-            <div class="payment-buttons">
-                <button class="cta-button" onclick="initiatePayment()">
-                    Buy with Razorpay Checkout
-                </button>
-    
-                <div class="divider">OR</div>
-    
-                <apple-pay-button 
-                    id="apple-pay-button"
-                    buttonstyle="white-outline" 
-                    type="buy" 
-                    locale="en"
-                    onclick="initiateApplePay()">
-                </apple-pay-button>
-            </div>
-        </div>
-        
-        <!-- ========================================== -->
-        <!-- S2S CARD PAYMENT SECTION -->
-        <!-- ========================================== -->
-        <div class="s2s-section">
-            <div class="divider">OR PAY WITH CARD (S2S)</div>
-            
-            <h2 class="s2s-header">Server-to-Server Card Payment</h2>
-            <p class="s2s-description">Enter your card details below for direct payment processing</p>
-            
-            <form class="card-form" id="s2s-card-form" onsubmit="handleS2SPayment(event)">
-                <div class="form-group">
-                    <label for="card-number">Card Number</label>
-                    <input 
-                        type="text" 
-                        id="card-number" 
-                        placeholder="4242 4242 4242 4242" 
-                        maxlength="19"
-                        required
-                        autocomplete="cc-number"
-                    >
-                </div>
-                
-                <div class="form-group">
-                    <label for="card-holder">Card Holder Name</label>
-                    <input 
-                        type="text" 
-                        id="card-holder" 
-                        placeholder="John Doe" 
-                        required
-                        autocomplete="cc-name"
-                    >
-                </div>
-                
-                <div class="form-row-3">
-                    <div class="form-group">
-                        <label for="expiry-month">Month</label>
-                        <input 
-                            type="text" 
-                            id="expiry-month" 
-                            placeholder="MM" 
-                            maxlength="2"
-                            required
-                            autocomplete="cc-exp-month"
-                        >
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="expiry-year">Year</label>
-                        <input 
-                            type="text" 
-                            id="expiry-year" 
-                            placeholder="YY" 
-                            maxlength="2"
-                            required
-                            autocomplete="cc-exp-year"
-                        >
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="cvv">CVV</label>
-                        <input 
-                            type="text" 
-                            id="cvv" 
-                            placeholder="123" 
-                            maxlength="4"
-                            required
-                            autocomplete="cc-csc"
-                        >
-                    </div>
-                </div>
-                
-                <button type="submit" class="pay-button-s2s" id="s2s-pay-button">
-                    Pay Now (S2S)
-                </button>
-                
-                <div class="shield-status" id="shield-status">
-                    Initializing Razorpay Shield...
-                </div>
-                
-                <div class="error-message" id="error-message"></div>
-                <div class="success-message" id="success-message"></div>
-            </form>
-        </div>
+ <div class="container">
+  <div class="header">
+   <h1>Razorpay Payments</h1>
+   <p>Premium payment experience across multiple geographies</p>
+  </div>
+
+  <!-- Configuration Section -->
+  <div class="config-section">
+   <h2>Configuration</h2>
+   <div class="form-row">
+    <div class="form-group">
+     <label for="country">Country / Geography</label>
+     <select id="country" onchange="updateCurrency()">
+      <option value="MY">Malaysia (MYR)</option>
+      <option value="SG">Singapore (SGD)</option>
+      <option value="US">USA (USD)</option>
+      <option value="IN">India (INR)</option>
+     </select>
     </div>
-
-    <div class="footer">
-        Razorpay does not endorse this page
+    <div class="form-group">
+     <label for="currency">Currency</label>
+     <select id="currency">
+      <option value="MYR">MYR</option>
+      <option value="SGD">SGD</option>
+      <option value="USD">USD</option>
+      <option value="INR">INR</option>
+     </select>
     </div>
+   </div>
+   <div class="form-row">
+    <div class="form-group">
+     <label for="amount">Amount (in smallest unit - cents/paise)</label>
+     <input type="number" id="amount" value="500" min="1" />
+    </div>
+    <div class="form-group">
+     <label for="display-amount">Display Amount</label>
+     <input type="text" id="display-amount" value="5.00 MYR" readonly style="background: rgba(255, 255, 255, 0.03); cursor: not-allowed;" />
+    </div>
+   </div>
+  </div>
 
-    <!-- Razorpay Checkout Script -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    
-    <!-- ========================================== -->
-    <!-- RAZORPAY SHIELD INTEGRATION -->
-    <!-- ========================================== -->
-    <script>
-        // Configure Shield
-        window.RazorpayShield = {
-            config: {
-                providers: [{
-                    name: "load_razorpay_session",
-                    enabled: true
-                }],
-            },
-        };
-    </script>
-    
-    <!-- Load Shield Library -->
-    <script src="https://checkout.razorpay.com/v1/shield.js"></script>
-    
-    <script>
-        // ============================================
-        // CONFIGURATION
-        // ============================================
-        
-        // S2S API Configuration
-        const S2S_CONFIG = {
-            apiKey: 'rzp_live_sg_TMe0NITbhAhyPJ',
-            // Backend proxy URL - update this with your deployed backend URL
-            // For local testing: 'http://localhost:3000/api/create-payment'
-            // For production: 'https://your-app.vercel.app/api/create-payment'
-            apiUrl: 'http://localhost:3000/api/create-payment'
-        };
-        
-        // Store Razorpay Shield Session ID
-        let razorpaySessionId = null;
-        
-        // Exchange rates (approximate - in real app, fetch from API)
-        const exchangeRates = {
-            'SGD': 1.00,
-            'USD': 0.74,
-            'EUR': 0.68,
-            'GBP': 0.58,
-            'INR': 62.00,
-            'JPY': 110.00,
-            'AUD': 1.12,
-            'CAD': 1.01,
-            'MYR': 3.42
-        };
+  <!-- Standard Checkout Integration -->
+  <div class="payment-section">
+   <h2>Standard Checkout</h2>
+   <p class="subtitle">Razorpay's hosted checkout page with all payment methods</p>
+   <button class="pay-button" onclick="initiateCheckout()">
+    Pay with Razorpay
+   </button>
+  </div>
 
-        // ============================================
-        // INITIALIZE RAZORPAY SHIELD
-        // ============================================
-        
-        (async function initializeShield() {
-            console.log('🛡️ Initializing Razorpay Shield...');
-            const shieldStatus = document.getElementById('shield-status');
-            
-            try {
-                razorpaySessionId = await RazorpayShield.loadRazorpaySession(S2S_CONFIG.apiKey);
-                console.log('✅ Shield Session ID:', razorpaySessionId);
-                
-                shieldStatus.textContent = '✅ Shield Active - Device fingerprint ready';
-                shieldStatus.classList.add('success');
-            } catch (error) {
-                console.error('❌ Shield initialization failed:', error);
-                shieldStatus.textContent = '⚠️ Shield initialization failed (payment will still work)';
-                shieldStatus.classList.add('error');
-            }
-        })();
+  <div class="section-divider"></div>
 
-        // ============================================
-        // PRICE CALCULATION
-        // ============================================
-        
-        console.log('Premium page loaded');
-        console.log('Available currencies:', Object.keys(exchangeRates));
-        
-        function updatePrice() {
-            console.log('updatePrice called');
-            const currency = document.getElementById('currency').value;
-            console.log('Selected currency:', currency);
-            const basePrice = 1.00; // Base price in SGD
-            const convertedPrice = (basePrice * exchangeRates[currency]);
-            
-            let displayPrice;
-            if (currency === 'JPY') {
-                displayPrice = Math.round(convertedPrice);
-            } else {
-                displayPrice = parseFloat(convertedPrice).toFixed(2);
-            }
-            
-            console.log('Display price:', displayPrice, currency);
-            document.getElementById('price').textContent = `${displayPrice} ${currency}`;
-        }
+  <!-- Server-to-Server Integrations -->
+  <div class="payment-section">
+   <h2>Server-to-Server Integrations</h2>
+   <p class="subtitle">Direct API integrations for advanced use cases</p>
 
-        // ============================================
-        // S2S CARD PAYMENT HANDLER
-        // ============================================
-        
-        async function handleS2SPayment(event) {
-            event.preventDefault();
-            
-            console.log('🔐 Initiating S2S Payment...');
-            
-            const payButton = document.getElementById('s2s-pay-button');
-            const errorMessage = document.getElementById('error-message');
-            const successMessage = document.getElementById('success-message');
-            
-            // Hide previous messages
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-            
-            // Disable button
-            payButton.disabled = true;
-            payButton.textContent = 'Processing...';
-            
-            try {
-                // Get form values
-                const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
-                const cardHolder = document.getElementById('card-holder').value;
-                const expiryMonth = document.getElementById('expiry-month').value.padStart(2, '0');
-                const expiryYear = document.getElementById('expiry-year').value;
-                const cvv = document.getElementById('cvv').value;
-                
-                // Get currency and amount
-                const currency = document.getElementById('currency').value;
-                const basePrice = 1.00;
-                const convertedPrice = (basePrice * exchangeRates[currency]);
-                
-                // Convert to smallest currency unit
-                let amount;
-                if (currency === 'JPY') {
-                    amount = Math.round(convertedPrice);
-                } else {
-                    amount = Math.round(convertedPrice * 100);
-                }
-                
-                console.log('💳 Payment Details:', { currency, amount, cardHolder });
-                
-                // Validate Shield Session ID
-                if (!razorpaySessionId) {
-                    console.warn('⚠️ Shield Session ID not available, proceeding without it');
-                }
-                
-                // Build payment request
-                const paymentRequest = {
-                    amount: amount,
-                    currency: currency,
-                    contact: "+6591119111", // You can make this dynamic
-                    email: "customer@example.com", // You can make this dynamic
-                    method: "card",
-                    card: {
-                        number: cardNumber,
-                        name: cardHolder,
-                        expiry_month: expiryMonth,
-                        expiry_year: expiryYear,
-                        cvv: cvv
-                    },
-                    authentication: {
-                        authentication_channel: "browser"
-                    },
-                    browser: {
-                        java_enabled: navigator.javaEnabled(),
-                        javascript_enabled: true,
-                        timezone_offset: new Date().getTimezoneOffset(),
-                        color_depth: screen.colorDepth,
-                        screen_width: screen.width,
-                        screen_height: screen.height
-                    },
-                    ip: "0.0.0.0", // In production, get from server
-                    referer: window.location.href,
-                    user_agent: navigator.userAgent
-                };
-                
-                // Add Shield Session ID if available
-                if (razorpaySessionId) {
-                    paymentRequest.device_fingerprint = {
-                        gateway_session_id: razorpaySessionId
-                    };
-                    console.log('🛡️ Shield Session ID included in payment');
-                }
-                
-                console.log('📤 Sending payment request...');
-                
-                // Make API call to backend proxy (which calls Razorpay)
-                const response = await fetch(S2S_CONFIG.apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(paymentRequest)
-                });
-                
-                const result = await response.json();
-                console.log('📥 Payment Response:', result);
-                
-                if (response.ok && result.status === 'captured') {
-                    // Payment successful
-                    console.log('✅ Payment Successful!');
-                    successMessage.textContent = `✅ Payment Successful! Payment ID: ${result.id}`;
-                    successMessage.style.display = 'block';
-                    
-                    // Clear form
-                    document.getElementById('s2s-card-form').reset();
-                    
-                } else if (result.status === 'authorized') {
-                    // Payment authorized (might need 3DS)
-                    console.log('✅ Payment Authorized (may require 3DS)');
-                    successMessage.textContent = `✅ Payment Authorized! Payment ID: ${result.id}`;
-                    successMessage.style.display = 'block';
-                    
-                    // Handle 3DS if needed
-                    if (result.authentication && result.authentication.authentication_url) {
-                        console.log('🔐 3DS Authentication required');
-                        window.open(result.authentication.authentication_url, '_blank');
-                    }
-                    
-                } else {
-                    // Payment failed
-                    throw new Error(result.error?.description || 'Payment failed');
-                }
-                
-            } catch (error) {
-                console.error('❌ Payment Error:', error);
-                errorMessage.textContent = `❌ Payment Failed: ${error.message}`;
-                errorMessage.style.display = 'block';
-            } finally {
-                // Re-enable button
-                payButton.disabled = false;
-                payButton.textContent = 'Pay Now (S2S)';
-            }
-        }
-        
-        // ============================================
-        // CARD NUMBER FORMATTING
-        // ============================================
-        
-        document.getElementById('card-number').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\s/g, '');
-            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-            e.target.value = formattedValue;
-        });
-        
-        // Only allow numbers in numeric fields
-        ['card-number', 'expiry-month', 'expiry-year', 'cvv'].forEach(id => {
-            document.getElementById(id).addEventListener('keypress', function(e) {
-                if (!/[0-9]/.test(e.key)) {
-                    e.preventDefault();
-                }
-            });
-        });
+   <!-- Apple Pay S2S -->
+   <div class="payment-method-section">
+    <h3>Apple Pay</h3>
+    <p>Redirects to Razorpay's hosted Apple Pay page</p>
+    <apple-pay-button
+     id="apple-pay-button"
+     buttonstyle="black"
+     type="buy"
+     locale="en"
+     onclick="initiateApplePayS2S()"
+     style="display: none;">
+    </apple-pay-button>
+    <button
+     id="apple-pay-fallback"
+     class="pay-button"
+     onclick="initiateApplePayS2S()"
+     style="display: none;">
+     Pay with Apple Pay
+    </button>
+    <div class="status-message" id="applepay-status"></div>
+   </div>
 
-        // ============================================
-        // EXISTING RAZORPAY CHECKOUT INTEGRATION
-        // ============================================
-        
-        function initiatePayment() {
-            console.log('initiatePayment called');
-            
-            if (typeof Razorpay === 'undefined') {
-                alert('❌ Razorpay script not loaded. Please check your internet connection and try again.');
-                console.error('Razorpay is not defined');
-                return;
-            }
+   <!-- Card S2S -->
+   <div class="payment-method-section">
+    <h3>Card Payment</h3>
+    <p>Direct card payment with 3DS/OTP authentication</p>
+    <form onsubmit="handleCardPayment(event); return false;">
+     <input type="text" id="card-number" class="card-input" placeholder="Card Number" maxlength="19" required />
+     <input type="text" id="card-holder" class="card-input" placeholder="Card Holder Name" required />
+     <div class="form-row-3">
+      <input type="text" id="expiry-month" class="card-input" placeholder="MM" maxlength="2" required />
+      <input type="text" id="expiry-year" class="card-input" placeholder="YY" maxlength="2" required />
+      <input type="text" id="cvv" class="card-input" placeholder="CVV" maxlength="4" required />
+     </div>
+     <button type="submit" class="pay-button" id="card-button">Pay with Card</button>
+    </form>
+    <div class="status-message" id="card-status"></div>
+   </div>
+  </div>
+ </div>
 
-            const currency = document.getElementById('currency').value;
-            const basePrice = 1.00;
-            const convertedPrice = (basePrice * exchangeRates[currency]);
-            
-            let amount;
-            if (currency === 'JPY') {
-                amount = Math.round(convertedPrice);
-            } else {
-                amount = Math.round(convertedPrice * 100);
-            }
+ <!-- Razorpay Checkout Script -->
+ <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-            console.log('Payment details:', {currency, convertedPrice, amount});
+ <!-- Shield Integration -->
+ <script>
+  window.RazorpayShield = {
+   config: {
+    providers: [{ name: "load_razorpay_session", enabled: true }]
+   }
+  };
+ </script>
+ <script src="https://checkout.razorpay.com/v1/shield.js"></script>
 
-            const options = {
-                "key": "rzp_live_sg_OEpIYO2fhq6fLD",
-                "amount": amount,
-                "currency": currency,
-                "name": "Coffee Shop",
-                "description": "Premium Coffee",
-                "handler": function (response) {
-                    alert("Payment Successful!\n" + 
-                          "Payment ID: " + response.razorpay_payment_id);
-                    console.log("Payment Response:", response);
-                },
-                "prefill": {
-                    "name": "",
-                    "email": "",
-                    "contact": ""
-                },
-                "notes": {
-                    "product": "Coffee"
-                },
-                "theme": {
-                    "color": "#000000"
-                },
-                "modal": {
-                    "ondismiss": function() {
-                        console.log("Payment cancelled by user");
-                    }
-                }
-            };
+ <script>
+  const API_URL = 'http://localhost:3000';
+  let razorpaySessionId = null;
 
-            try {
-                console.log('Opening Razorpay checkout...');
-                const rzp = new Razorpay(options);
-                rzp.open();
-            } catch (error) {
-                console.error('Razorpay error:', error);
-                alert('❌ Error initializing payment: ' + error.message);
-            }
-        }
+  // Razorpay key IDs by country (for Checkout)
+  const CHECKOUT_KEYS = {
+   'MY': 'rzp_live_fQOafVJoJqscJ6',
+   'SG': 'rzp_live_sg_TMe0NITbhAhyPJ',
+   'US': 'rzp_live_us_zTra1XQBrgsH7z',
+   'IN': 'rzp_live_NzQyvOURi85M5r'
+  };
 
-        // Initialize price on page load
-        window.onload = function() {
-            console.log('Window loaded, initializing...');
-            updatePrice();
-        };
-    </script>
-    
-    <!-- ============================================ -->
-    <!-- APPLE PAY IMPLEMENTATION -->
-    <!-- ============================================ -->
-    <script>
-        const RAZORPAY_KEY = 'rzp_live_sg_OEpIYO2fhq6fLD';
-        
-        const APPLE_PAY_CONFIG = {
-            domain: "shashwatgupta23.github.io",
-            displayName: "Coffee Shop"
-        };
-        
-        function checkApplePayAvailability() {
-            if (window.ApplePaySession) {
-                const applePayCapabilities = ApplePaySession.supportsVersion(6);
-                
-                if (applePayCapabilities && ApplePaySession.canMakePayments()) {
-                    console.log('✅ Apple Pay is available (Version 6 supported)');
-                    console.log('✅ Apple Pay can make payments');
-                    
-                    const merchantIdentifier = 'dc562693173b47ec12c8cf72ca32bc58bd90936c27418f2b4eebd089';
-                    
-                    ApplePaySession.canMakePaymentsWithActiveCard(merchantIdentifier)
-                        .then((canMakePayments) => {
-                            if (canMakePayments) {
-                                console.log('✅ User has active Apple Pay cards');
-                            } else {
-                                console.log('⚠️ User needs to add cards to Apple Pay');
-                            }
-                        })
-                        .catch((error) => {
-                            console.log('⚠️ Could not check for active cards:', error);
-                        });
-                    
-                    document.getElementById('apple-pay-button').style.display = 'inline-block';
-                    return true;
-                } else if (!applePayCapabilities) {
-                    console.log('❌ Apple Pay Version 6 not supported');
-                    document.getElementById('apple-pay-button').style.display = 'none';
-                    return false;
-                } else {
-                    console.log('⚠️ Apple Pay not set up on this device');
-                    document.getElementById('apple-pay-button').style.display = 'none';
-                    return false;
-                }
-            } else {
-                console.log('❌ Apple Pay not supported on this browser');
-                document.getElementById('apple-pay-button').style.display = 'none';
-                return false;
-            }
-        }
-        
-        function initiateApplePay() {
-            console.log('🍎 Apple Pay initiated');
-            
-            if (!checkApplePayAvailability()) {
-                alert('Apple Pay is not available on this device or browser');
-                return;
-            }
-            
-            const currency = document.getElementById('currency').value;
-            const basePrice = 1.00;
-            const convertedPrice = (basePrice * exchangeRates[currency]);
-            
-            let displayAmount;
-            if (currency === 'JPY') {
-                displayAmount = Math.round(convertedPrice).toString();
-            } else {
-                displayAmount = convertedPrice.toFixed(2);
-            }
-            
-            console.log('💰 Payment amount:', displayAmount, currency);
-            
-            const request = {
-                countryCode: 'US',
-                currencyCode: currency,
-                merchantCapabilities: ['supports3DS'],
-                supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
-                total: {
-                    label: APPLE_PAY_CONFIG.displayName,
-                    amount: displayAmount,
-                    type: 'final'
-                },
-                requiredBillingContactFields: ['postalAddress', 'name']
-            };
-            
-            console.log('📋 Apple Pay request:', request);
-            
-            try {
-                const session = new ApplePaySession(6, request);
-                
-                session.onvalidatemerchant = function(event) {
-                    console.log('🔐 Validating merchant...');
-                    validateMerchant(event.validationURL, session, currency, displayAmount);
-                };
-                
-                session.onpaymentauthorized = function(event) {
-                    console.log('✅ Payment authorized');
-                    handlePaymentAuthorization(event.payment, session, currency, displayAmount);
-                };
-                
-                session.oncancel = function(event) {
-                    console.log('❌ Apple Pay cancelled');
-                };
-                
-                session.begin();
-                console.log('🚀 Apple Pay session started');
-                
-            } catch (error) {
-                console.error('❌ Error starting Apple Pay session:', error);
-                alert('Error starting Apple Pay: ' + error.message);
-            }
-        }
-        
-        async function validateMerchant(validationURL, session, currency, amount) {
-            console.log('📡 Using CORS proxy (TEST ONLY)...');
-            
-            try {
-                let amountInCents = currency === 'JPY' 
-                    ? Math.round(parseFloat(amount))
-                    : Math.round(parseFloat(amount) * 100);
-                
-                const authString = btoa(RAZORPAY_KEY + ':');
-                
-                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-                const apiUrl = 'https://api.razorpay.com/v1/payments/create/ajax';
-                
-                const response = await fetch(proxyUrl + apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Basic ${authString}`,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({
-                        method: 'card',
-                        amount: amountInCents,
-                        contact: '+910000000000',
-                        email: 'applepay@example.com',
-                        currency: currency,
-                        provider: 'apple_pay',
-                        initiative_context_url: APPLE_PAY_CONFIG.domain,
-                        merchant_validation_url: validationURL,
-                        save: 0
-                    })
-                });
-                
-                const data = await response.json();
+  // Initialize Shield
+  (async function initShield() {
+   try {
+    const country = document.getElementById('country').value;
+    razorpaySessionId = await RazorpayShield.loadRazorpaySession(CHECKOUT_KEYS[country]);
+    console.log('✅ Shield initialized');
+   } catch (error) {
+    console.warn('⚠️ Shield init failed:', error);
+   }
+  })();
 
-                if (typeof data === 'string') {
-                    data = JSON.parse(data);
-                }
+  // Update currency when country changes
+  function updateCurrency() {
+   const country = document.getElementById('country').value;
+   const currencyMap = { 'MY': 'MYR', 'SG': 'SGD', 'US': 'USD', 'IN': 'INR' };
+   document.getElementById('currency').value = currencyMap[country];
+   updateDisplayAmount();
+  }
 
-                try {
-                    if (data?.data?.session_data) {
-                        session.completeMerchantValidation(data?.data?.session_data);
-                    } else {
-                        throw new Error('No Apple Pay session received from server');
-                    }
-                } catch (error) {
-                    console.error('Validation error:', error);
-                }
-                
-            } catch (error) {
-                console.error('❌ Validation error:', error);
-                session.abort();
-            }
-        }
-        
-        async function handlePaymentAuthorization(payment, session, currency, amount) {
-            console.log('💳 Processing payment...');
-            console.log('Payment token:', payment.token);
-            console.log('Billing contact:', payment.billingContact);
-            
-            try {
-                console.log('✅ Payment would be processed here');
-                
-                session.completePayment(ApplePaySession.STATUS_SUCCESS);
-                
-                alert('Apple Pay Payment Successful! ✅\n\nAmount: ' + amount + ' ' + currency + '\n\nThank you for your purchase!');
-                
-            } catch (error) {
-                console.error('❌ Payment processing error:', error);
-                session.completePayment(ApplePaySession.STATUS_FAILURE);
-                alert('Payment failed. Please try again.');
-            }
-        }
-        
-        window.addEventListener('load', function() {
-            console.log('🔍 Checking Apple Pay availability...');
-            checkApplePayAvailability();
-        });
-    </script>
+  // Update display amount
+  function updateDisplayAmount() {
+   const amount = parseInt(document.getElementById('amount').value);
+   const currency = document.getElementById('currency').value;
+   const displayAmount = (amount / (currency === 'JPY' || currency === 'INR' && amount < 1000 ? 1 : 100)).toFixed(2);
+   document.getElementById('display-amount').value = `${displayAmount} ${currency}`;
+  }
+
+  document.getElementById('amount').addEventListener('input', updateDisplayAmount);
+  document.getElementById('currency').addEventListener('change', updateDisplayAmount);
+
+  // Card number formatting
+  document.getElementById('card-number').addEventListener('input', function(e) {
+   let value = e.target.value.replace(/\s/g, '');
+   e.target.value = value.match(/.{1,4}/g)?.join(' ') || value;
+  });
+
+  // Standard Checkout
+  function initiateCheckout() {
+   const country = document.getElementById('country').value;
+   const amount = parseInt(document.getElementById('amount').value);
+   const currency = document.getElementById('currency').value;
+
+   const options = {
+    key: CHECKOUT_KEYS[country],
+    amount: amount,
+    currency: currency,
+    name: "Coffee Shop",
+    description: "Test Payment",
+    handler: function(response) {
+     alert("✅ Payment Successful!\nPayment ID: " + response.razorpay_payment_id);
+    },
+    theme: { color: "#667eea" }
+   };
+
+   const rzp = new Razorpay(options);
+   rzp.open();
+  }
+
+  // Apple Pay S2S
+  async function initiateApplePayS2S() {
+   const country = document.getElementById('country').value;
+   const amount = parseInt(document.getElementById('amount').value);
+   const currency = document.getElementById('currency').value;
+   const status = document.getElementById('applepay-status');
+
+   status.classList.remove('show', 'success', 'error');
+
+   try {
+    const response = await fetch(`${API_URL}/api/create-applepay-payment`, {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({ amount, currency, country, contact: '+60123456789', email: 'test@example.com' })
+    });
+
+    const result = await response.json();
+
+    if (response.ok && result.apple_pay_url) {
+     window.location.href = result.apple_pay_url;
+    } else if (response.ok) {
+     status.textContent = `✅ Payment Successful! ID: ${result.id}`;
+     status.classList.add('show', 'success');
+    } else {
+     throw new Error(result.error?.description || 'Payment failed');
+    }
+   } catch (error) {
+    status.textContent = `❌ Error: ${error.message}`;
+    status.classList.add('show', 'error');
+   }
+  }
+
+  // Card S2S
+  async function handleCardPayment(event) {
+   event.preventDefault();
+   const button = document.getElementById('card-button');
+   const status = document.getElementById('card-status');
+
+   status.classList.remove('show', 'success', 'error');
+   button.disabled = true;
+   button.textContent = 'Processing...';
+
+   try {
+    const country = document.getElementById('country').value;
+    const amount = parseInt(document.getElementById('amount').value);
+    const currency = document.getElementById('currency').value;
+
+    const paymentRequest = {
+     amount,
+     currency,
+     country,
+     method: 'card',
+     contact: '+60123456789',
+     email: 'test@example.com',
+     card: {
+      number: document.getElementById('card-number').value.replace(/\s/g, ''),
+      name: document.getElementById('card-holder').value,
+      expiry_month: document.getElementById('expiry-month').value.padStart(2, '0'),
+      expiry_year: document.getElementById('expiry-year').value,
+      cvv: document.getElementById('cvv').value
+     },
+     authentication: { authentication_channel: 'browser' },
+     browser: {
+      java_enabled: navigator.javaEnabled(),
+      javascript_enabled: true,
+      timezone_offset: new Date().getTimezoneOffset(),
+      color_depth: screen.colorDepth,
+      screen_width: screen.width,
+      screen_height: screen.height
+     },
+     ip: '0.0.0.0',
+     referer: window.location.href,
+     user_agent: navigator.userAgent
+    };
+
+    if (razorpaySessionId) {
+     paymentRequest.device_fingerprint = { gateway_session_id: razorpaySessionId };
+    }
+
+    const response = await fetch(`${API_URL}/api/create-payment`, {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify(paymentRequest)
+    });
+
+    const result = await response.json();
+
+    if (response.ok && result.authentication?.authentication_url) {
+     window.open(result.authentication.authentication_url, '_blank');
+     status.textContent = `✅ Payment created! Complete OTP authentication. Payment ID: ${result.id}`;
+     status.classList.add('show', 'success');
+    } else if (response.ok) {
+     status.textContent = `✅ Payment Successful! ID: ${result.id}`;
+     status.classList.add('show', 'success');
+    } else {
+     throw new Error(result.error?.description || 'Payment failed');
+    }
+   } catch (error) {
+    status.textContent = `❌ Error: ${error.message}`;
+    status.classList.add('show', 'error');
+   } finally {
+    button.disabled = false;
+    button.textContent = 'Pay with Card';
+   }
+  }
+
+  // Check Apple Pay availability and show appropriate button
+  function checkApplePayAvailability() {
+   const applePayButton = document.getElementById('apple-pay-button');
+   const fallbackButton = document.getElementById('apple-pay-fallback');
+
+   if (window.ApplePaySession && ApplePaySession.canMakePayments()) {
+    // Apple Pay available - show native button
+    applePayButton.style.display = 'inline-block';
+    fallbackButton.style.display = 'none';
+    console.log('✅ Apple Pay available');
+   } else {
+    // Apple Pay not available - show fallback button
+    applePayButton.style.display = 'none';
+    fallbackButton.style.display = 'block';
+    console.log('ℹ️ Apple Pay not available - showing fallback button');
+   }
+  }
+
+  // Initialize
+  updateDisplayAmount();
+  checkApplePayAvailability();
+ </script>
 </body>
 </html>
