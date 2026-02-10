@@ -1,5 +1,3 @@
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-
 const RAZORPAY_API_BASE = 'https://api.razorpay.com';
 
 const RAZORPAY_CONFIGS = {
