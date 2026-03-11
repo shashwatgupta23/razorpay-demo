@@ -2,9 +2,6 @@
 <html lang="en">
 <head>
  <script src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"></script>
- <!-- Airwallex Device Fingerprinting Scripts -->
- <script src="https://static-demo.airwallex.com/webapp/fraud/device-fingerprint/index.js"></script>
- <script src="https://static.airwallex.com/webapp/fraud/device-fingerprint/index.js"></script>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>Razorpay Payment Integration Demo</title>
@@ -395,27 +392,6 @@
    'IN': 'rzp_live_NzQyvOURi85M5r'
   };
 
-  // Initialize Airwallex Device Fingerprinting
-  (function initAirwallexFingerprint() {
-   try {
-    // Dummy ORDER-SESSION-ID for testing
-    const dummySessionId = 'TEST-SESSION-' + Date.now();
-
-    // Check if Airwallex fingerprinting is loaded
-    if (typeof window.AWXDeviceFingerprint !== 'undefined') {
-     window.AWXDeviceFingerprint.init({
-      session_id: dummySessionId,
-      env: 'demo' // Using demo environment
-     });
-     console.log('✅ Airwallex Device Fingerprinting initialized with session:', dummySessionId);
-    } else {
-     console.warn('⚠️ Airwallex Device Fingerprinting not loaded');
-    }
-   } catch (error) {
-    console.error('❌ Airwallex fingerprint init failed:', error);
-   }
-  })();
-
   // Initialize Shield
   (async function initShield() {
    try {
@@ -601,6 +577,24 @@
   // Initialize
   updateDisplayAmount();
   checkApplePayAvailability();
+ </script>
+
+ <!-- Airwallex Device Fingerprinting - Demo Environment -->
+ <script
+  type="text/javascript"
+  async
+  id="airwallex-fraud-api-demo"
+  data-order-session-id="DEMO-TEST-SESSION-123456789"
+  src="https://static-demo.airwallex.com/webapp/fraud/device-fingerprint/index.js">
+ </script>
+
+ <!-- Airwallex Device Fingerprinting - Production Environment -->
+ <script
+  type="text/javascript"
+  async
+  id="airwallex-fraud-api-prod"
+  data-order-session-id="PROD-TEST-SESSION-987654321"
+  src="https://static.airwallex.com/webapp/fraud/device-fingerprint/index.js">
  </script>
 </body>
 </html>
